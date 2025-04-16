@@ -1,0 +1,18 @@
+# poetry setup: https://stackoverflow.com/questions/68882603/using-python-poetry-to-publish-to-test-pypi-org
+# poetry docs: https://python-poetry.org/docs/
+
+[tool.poetry]
+name = "__SRCPATH__"
+version = "__RELEASE__"
+description = ""
+authors = ["__AUTHORNAME__"]
+license = "LICENSE"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+numpy = ">=1.23"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
