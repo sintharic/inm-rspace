@@ -24,11 +24,11 @@ for file in "$DOCS_DIR"/*.rst; do
 done
 
 # Modify modules.rst: delete everything up to ".. toctree::"
-awk '
-    BEGIN { keep = 0 }
-    /.. toctree::/ { keep = 1; print; next }
-    keep
-' "$DOCS_DIR/modules.rst" > "$DOCS_DIR/modules.rst.tmp" && mv "$DOCS_DIR/modules.rst.tmp" "$DOCS_DIR/modules.rst"
+# awk '
+#     BEGIN { keep = 0 }
+#     /.. toctree::/ { keep = 1; print; next }
+#     keep
+# ' "$DOCS_DIR/modules.rst" > "$DOCS_DIR/modules.rst.tmp" && mv "$DOCS_DIR/modules.rst.tmp" "$DOCS_DIR/modules.rst"
 
 # Modify index.rst: Replace ":maxdepth: 2" with ":maxdepth: 3"
 # awk '

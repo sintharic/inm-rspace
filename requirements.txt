@@ -1,3 +1,4 @@
+rspace-client
 numpy
 scipy
 matplotlib

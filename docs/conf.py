@@ -12,17 +12,17 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('__SRCPATH__'))
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = '__MODULENAME__'
-copyright = '__YEAR__, __AUTHORNAME__'
-author = '__AUTHORNAME__'
+project = 'inm-rspace'
+copyright = '2025, Christian Müller'
+author = 'Christian Müller'
 
 # The full version, including alpha/beta/rc tags
-release = '__RELEASE__'
+release = '0.1'
 
 
 # -- General configuration ---------------------------------------------------

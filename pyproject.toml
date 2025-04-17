@@ -2,10 +2,10 @@
 # poetry docs: https://python-poetry.org/docs/
 
 [tool.poetry]
-name = "__SRCPATH__"
-version = "__RELEASE__"
+name = "inm-rspace"
+version = "0.1.1"
 description = ""
-authors = ["__AUTHORNAME__"]
+authors = ["Christian Müller"]
 license = "LICENSE"
 readme = "README.md"
 
