@@ -83,10 +83,13 @@ def update_document(document, info='', files=[]):
 
 
 # requests = get_requests()
-requests = [core.ELN.get_document('12640')]
-print(f'Processing {len(requests)} new requests...')
+# requests = [core.ELN.get_document('12640')]
+# print(f'Processing {len(requests)} new requests...')
 
-sys.path.append('..')#TEMP
+# sys.path.append('..')#TEMP
+
+
+
 # import create_doe
 
 # for doc in requests:

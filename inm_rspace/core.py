@@ -25,7 +25,10 @@ import os
 from xml.dom.minidom import parseString as parse_xml
 from fnmatch import fnmatch
 from rspace_client.eln import eln
-ELN = eln.ELNClient(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
+try:
+  ELN = eln.ELNClient(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
+except:
+  ELN = None
 
 replace = {' ': '_', ',': '.', '<p>': '', '</p>': ''}
 
