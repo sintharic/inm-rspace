@@ -7,80 +7,6 @@ from . import core
 
 SHARED_FOLDER_ID = '1018'
 
-def get_docs_by_form(form_pattern, folder_id):
-  """
-  scan for Rspace documents in a given folder whose form name matches a pattern
-  
-  Parameters
-  ----------
-  form_pattern : str
-      glob-style pattern that the form name must match
-  folder_id : str
-      folderID of the Rspace folder to search for matches
-
-  Returns
-  -------
-  results : list<RspaceDocument>
-      list of documents matching the form name
-  """
-  records = core.ELN.list_folder_tree(folder_id)
-  results = []
-  for share in records['records']:
-    if share['type']=='NOTEBOOK':
-      for page in core.ELN.list_folder_tree(share['id'])['records']:
-        doc = core.ELN.get_document(page['id'])
-        print(f"- {share['name']}/{doc['name']} ({doc['form']['name']})")
-        form_name = doc['form']['name']
-        if fnmatch(form_name, form_pattern): results.append(doc)
-    else:
-      doc = core.ELN.get_document(share['id'])
-      print(f"- {doc['name']} ({doc['form']['name']})")
-      form_name = doc['form']['name']
-      if fnmatch(form_name, form_pattern): results.append(doc)
-
-  return results
-
-
-def get_requests(shared_folder_id):
-  """get all shared documents requesting a workflow to be performed
-  
-  Parameters
-  ----------
-  shared_folder_id : str
-      folderId of the "Shared" Folder in Rspace
-  
-  Returns
-  -------
-  result : list<RspaceDocument>
-      list of shared Rspace documents using a `Request:*` form
-  """
-  user_folders = core.ELN.list_folder_tree(shared_folder_id)
-  result = []
-  for folder in user_folders['records']:
-    print(f"{folder['name']}:")
-    result += get_docs_by_form('Request:*', folder['id'])
-    print()
-
-  return result
-
-def get_field(document, field_name):
-  """get (the first) field from an Rspace document with a given name.
-  
-  Parameters
-  ----------
-  document : RspaceDocument
-      input document
-  field_name : str
-      name of the field to be accessed
-  
-  Returns
-  -------
-  field : dict
-      field with the given name
-  """
-  for field in document['fields']:
-    if field['name']==field_name: return field
-  return {}
 
 def get_file_paths(field):
   """Not yet working!
@@ -98,17 +24,40 @@ def get_file_paths(field):
   return files
 
 
+class Workflow:
+  def __init__(self, document: dict):
+    self.document = document
+    self.expected = dict()
+    self.expected['name'] = str(self.__class__.mro()[0]).split('.')[-1]
+    self.expected['input_files'] = ['*']
+    self.expected['output_data'] = [str]
+
+  def check(self):
+    workflow = core.get_field(self.document, 'workflow')
+    if workflow!=self.expected['name']:
+      raise ValueError(f"initialized workflow '{self.expected['name']}', but {self.document['globalId']} requests '{workflow}'.")
+
+  def run(self):
+    input_files = core.get_files(self.document, 'Input Data')
+    file_objects = []
+    for file in input_files:
+      pass
+    self.info = 'Read'
+
+
+
+
 
 def update_document(document, info='', files=[]):
   """update a request documents
   
   Parameters
   ----------
-  document : RspaceDocument
+  document : dict
       the request document to be updates
   info : str, optional
       info to be written to the "Output Data" text field (e.g. error messages)
-  files : list, optional
+  files : list<str>, optional
       list of files to append to the "Output Data" field
   """
 

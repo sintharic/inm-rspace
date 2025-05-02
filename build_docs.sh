@@ -4,24 +4,24 @@ sphinx-apidoc -o docs . --separate
 DOCS_DIR="docs"
 
 # Process all .rst files except index.rst and modules.rst
-for file in "$DOCS_DIR"/*.rst; do
-    filename=$(basename "$file")
+# for file in "$DOCS_DIR"/*.rst; do
+#     filename=$(basename "$file")
 
-    if [[ "$filename" == "index.rst" || "$filename" == "modules.rst" ]]; then
-        continue
-    fi
+#     if [[ "$filename" == "index.rst" || "$filename" == "modules.rst" ]]; then
+#         continue
+#     fi
 
-    name="${filename%.rst}"  # Extract filename without extension
+#     name="${filename%.rst}"  # Extract filename without extension
 
-    # Use awk to delete everything before the first occurrence of $name
-    # and remove everything after and including "Module content"
-    awk -v name="$name" '
-        BEGIN { keep = 0 }
-        $0 ~ name { keep = 1 }
-        keep && !found_end { print }
-        /Module content/ { found_end = 1 }
-    ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
-done
+#     # Use awk to delete everything before the first occurrence of $name
+#     # and remove everything after and including "Module content"
+#     awk -v name="$name" '
+#         BEGIN { keep = 0 }
+#         $0 ~ name { keep = 1 }
+#         keep && !found_end { print }
+#         /Module content/ { found_end = 1 }
+#     ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+# done
 
 # Modify modules.rst: delete everything up to ".. toctree::"
 # awk '
@@ -37,4 +37,4 @@ done
 # ' "$DOCS_DIR/index.rst" > "$DOCS_DIR/index.rst.tmp" && mv "$DOCS_DIR/index.rst.tmp" "$DOCS_DIR/index.rst"
 
 
-sphinx-build docs _build
+sphinx-build "$DOCS_DIR" _build

@@ -4,13 +4,13 @@
    contain the root `toctree` directive.
 
 Welcome to inm-rspace's documentation!
-====================================
+======================================
 
 .. toctree::
    :maxdepth: 3
    :caption: Contents:
 
-   modules
+   inm_rspace
 
 
 
