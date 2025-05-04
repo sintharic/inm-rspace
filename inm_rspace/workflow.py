@@ -1,11 +1,15 @@
 import os, sys
 import shutil
+import traceback
+from pathlib import Path
+from datetime import datetime
 from fnmatch import fnmatch
 from . import core
 
 
 
 SHARED_FOLDER_ID = '1018'
+HOME = str(Path.home())
 
 
 def get_file_paths(field):
@@ -25,104 +29,139 @@ def get_file_paths(field):
 
 
 class Workflow:
-  def __init__(self, document: dict):
+  def __init__(self, document: dict, path=HOME):
+    self.name = str(self.__class__.mro()[0]).split('.')[-1][:-2]
     self.document = document
     self.expected = dict()
-    self.expected['name'] = str(self.__class__.mro()[0]).split('.')[-1]
+    self.expected['name'] = self.name
     self.expected['input_files'] = ['*']
-    self.expected['output_data'] = [str]
+    self.expected['output_files'] = ['*.txt']
+    self.directory = f"{path}{os.sep}{self.name}{os.sep}{self.document['name']}"
+    
+    date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    self.info = f'Workflow \'{self.name}\' initiated {date}.\n'
+    self.code = 0
+    self.traceback = ''
+    self.input_files = []
+    self.output_files = []
 
-  def check(self):
-    workflow = core.get_field(self.document, 'workflow')
-    if workflow!=self.expected['name']:
-      raise ValueError(f"initialized workflow '{self.expected['name']}', but {self.document['globalId']} requests '{workflow}'.")
+    print(self.name)
+
+  def prepare(self):
+    """Perform checks before workflow execution
+    
+    Returns
+    -------
+    code: int
+        Error Code. Can be processed via 
+    """
+    self.check_completed()
+    if self.code: return
+    
+    os.makedirs(self.directory, exist_ok=True)
+
+    self.check_workflow()
+    if self.code: return
+    
+    self.get_input_files()
+  
+  def check_completed(self):
+    completed = core.get_field(self.document, 'Completed')['content']
+    if completed != 'no': 
+      self.code = 1
+
+  def check_workflow(self):
+    workflow = core.get_field(self.document, 'Workflow')['content']
+    if workflow!=self.expected['name']: 
+      self.code = 2
+
+  def get_input_files(self):
+    files_found = core.get_files(self.document, 'Input Data')
+    files_matched = [{'name': '__missing__'}]*len(self.expected['input_files'])
+    for ifile, file_pattern in enumerate(self.expected['input_files']):
+      for file in files_found:
+        if fnmatch(file['name'], file_pattern): files_matched[ifile] = file
+
+    for file in files_matched:
+      if file['name']=='__missing__': 
+        self.code = 3
+        return
+
+    self.download_files(files_matched)
+
+  def download_files(self, files):
+    for file in files:
+      filepath = f"{self.directory}{os.sep}{file['name']}"
+      try: core.ELN.download_file(file['id'], filepath)
+      except: 
+        self.traceback = traceback.format_exc()
+        self.code = 4
+        return
+      self.input_files.append(filepath)
+
+  def workflow(self):
+    self.info += 'Running base Workflow class.\n'
+    filepath = f"{self.directory}{os.sep}result.txt"
+    with open(filepath, 'w') as fid:
+      fid.write('Dummy result of base Workflow class.')
+    self.output_files.append(filepath)
+
+  def summary(self):
+    if self.traceback != '':
+      filepath = f"{self.directory}{os.sep}error_traceback.txt"
+      with open(filepath, 'w') as fid:
+        fid.write(self.traceback)
+      self.output_files.append(filepath)
+
+    msg = f'Exit with the error code {self.code}: '
+    if self.code == 1: 
+      msg += 'Request already completed.'
+    elif self.code == 2: 
+      msg += 'Requested workflow does not match.\n'
+      workflow = core.get_field(self.document, 'Workflow')['content']
+      msg += f"Initialized workflow is '{self.expected['name']}', but {self.document['globalId']} requests '{workflow}'."
+    elif self.code == 3: 
+      msg += 'Supplied files do not match.\n'
+      msg += f"Workflow '{self.name}' expects the following files: {self.expected['input_files']}"
+    elif self.code == 4: 
+      msg += 'Unable to download files.\n'
+      msg += 'Check the attached traceback for more info.'
+    elif self.code == 5: 
+      msg += 'Unable to upload files.\n'
+      msg += 'A full traceback of the error has been saved on the device processing the workflow.'
+    else: 
+      msg = 'Completed without errors.'
+
+    return msg
+
+  def update_document(self):
+    # upload result files
+    uploads = []
+    for file in self.output_files:
+      try: 
+        file_obj = core.ELN.upload_file(open(file, 'rb'))
+        uploads.append(file_obj)
+      except:
+        self.traceback = traceback.format_exc()
+        self.code = 5
+
+    # link result files to document
+    self.info += self.summary()
+    fields = self.document['fields']
+    for i in range(len(fields)):
+      if fields[i]['name']=='Completed' and not self.code:
+        fields[i]['content'] = 'yes'
+      elif fields[i]['name']=='Output Data':
+        fields[i]['content'] = self.info
+        for upload in uploads:
+          fields[i]['content'] += f"<br/>{core.html_ref(upload)}"
+    
+    # update document
+    core.ELN.update_document(self.document['id'], fields=fields)
 
   def run(self):
-    input_files = core.get_files(self.document, 'Input Data')
-    file_objects = []
-    for file in input_files:
-      pass
-    self.info = 'Read'
-
-
-
-
-
-def update_document(document, info='', files=[]):
-  """update a request documents
-  
-  Parameters
-  ----------
-  document : dict
-      the request document to be updates
-  info : str, optional
-      info to be written to the "Output Data" text field (e.g. error messages)
-  files : list<str>, optional
-      list of files to append to the "Output Data" field
-  """
-
-  # upload result files
-  uploads = []
-  for file in files:
-    file_obj = core.ELN.upload_file(open(file, 'rb'))
-    uploads.append(file_obj)
-
-  # link result files to document
-  fields = document['fields']
-  for i in range(len(fields)):
-    if fields[i]['name']=='Completed':
-      fields[i]['content'] = 'yes'
-    elif fields[i]['name']=='Output Data':
-      fields[i]['content'] = info
-      for upload in uploads:
-        fields[i]['content'] += f"<br/>{core.html_ref(upload)}"
-  
-  # update document
-  core.ELN.update_document(document['id'], fields=fields)
-
-
-
-# requests = get_requests()
-# requests = [core.ELN.get_document('12640')]
-# print(f'Processing {len(requests)} new requests...')
-
-# sys.path.append('..')#TEMP
-
-
-
-# import create_doe
-
-# for doc in requests:
-#   completed = get_field(doc, 'Completed')['content']
-#   if completed != 'no': continue
-
-#   info = ''
-#   output_files = []
-
-#   try:
-#     workflow = get_field(doc, 'Workflow')['content']
-#     print(workflow)
-
-#     folder = f"rspace_processing{os.sep}{doc['name']}"
-#     os.makedirs(folder, exist_ok=True)
-#     input_attachments = core.get_files(doc, 'Input Data')
-#     print(input_attachments)
-#     input_files = []  
-#     for file in input_attachments:
-#       filepath = f"{folder}{os.sep}{file[1]}"
-#       input_files.append(filepath)
-#       core.ELN.download_file(file[0], filepath)
-
-#     if workflow!='create_SiHy_doe': #TEMP
-#       raise ValueError(f"Workflow '{workflow}' not supported.")
-#     output_files = create_doe.run(*input_files)
-#     output_files = list(output_files)
-
-#     for i,file in enumerate(output_files):
-#       new_file = f"{folder}{os.sep}{os.path.split(file)[-1]}"
-#       shutil.move(file, new_file)
-#       output_files[i] = new_file
-#   except Exception as e:
-#     info = e.__repr__()
-
-#   update_document(doc, info=info, files=output_files)
+    self.prepare()
+    if not self.code:
+      self.workflow()
+    self.update_document()
+    

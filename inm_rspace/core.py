@@ -25,10 +25,27 @@ import os
 from xml.dom.minidom import parseString as parse_xml
 from fnmatch import fnmatch
 from rspace_client.eln import eln
+
+class ELNDummy:
+  """Dummy ELN object for testing
+  """
+  
+  def __init__(self):
+    return
+  
+  def list_folder_tree(*args):
+    return {'records': []}
+  
+  def get_document(*args):
+    return {'name': '', 'form': dict()}
+
+  def get_folder(*args):
+    return {'name': ''}
+
 try:
   ELN = eln.ELNClient(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
 except:
-  ELN = None
+  ELN = ELNDummy()
 
 replace = {' ': '_', ',': '.', '<p>': '', '</p>': ''}
 
@@ -181,7 +198,38 @@ def get_files(document, field_key=None):
   # except: 
   #   return []
 
-def get_docs_in_folder(folder_id, form_pattern=None):
+def get_docs_in_notebook(notebook_id, form_pattern=None, verbose=False):
+  """
+  scan for Rspace documents in a given folder whose form name matches a pattern
+  
+  Parameters
+  ----------
+  notebook_id : str
+      notebookID of the Rspace notebook to search for matches
+  form_pattern : str
+      glob-style pattern that the form name must match
+
+  Returns
+  -------
+  results : list<dict>
+      list of documents matching the form name
+  """
+
+  results = []
+  records = ELN.list_folder_tree(notebook_id)
+  nb_name = ELN.get_folder(notebook_id)['name']
+  for page in records['records']:
+    doc = ELN.get_document(page['id'])
+    print(f"- {nb_name}/{doc['name']} ({doc['form']['name']})")
+    if form_pattern is None: 
+      results.append(doc)
+      continue
+    form_name = doc['form']['name']
+    if fnmatch(form_name, form_pattern): results.append(doc)
+
+  return results
+
+def get_docs_in_folder(folder_id, form_pattern=None, verbose=False):
   """
   scan for Rspace documents in a given folder whose form name matches a pattern
   
@@ -201,27 +249,21 @@ def get_docs_in_folder(folder_id, form_pattern=None):
   results = []
   for share in records['records']:
     if share['type']=='NOTEBOOK':
-      for page in ELN.list_folder_tree(share['id'])['records']:
-        doc = ELN.get_document(page['id'])
-        print(f"- {share['name']}/{doc['name']} ({doc['form']['name']})")
-        if form_pattern is None: 
-          results.append(doc)
-          continue
-        form_name = doc['form']['name']
-        if fnmatch(form_name, form_pattern): results.append(doc)
-    else:
-      doc = ELN.get_document(share['id'])
-      print(f"- {doc['name']} ({doc['form']['name']})")
-      if form_pattern is None: 
-        results.append(doc)
-        continue
-      form_name = doc['form']['name']
-      if fnmatch(form_name, form_pattern): results.append(doc)
+      results += get_docs_in_notebook(share['id'], form_pattern=form_pattern, verbose=verbose)
+      continue
+    
+    doc = ELN.get_document(share['id'])
+    if verbose: print(f"- {doc['name']} ({doc['form']['name']})")
+    if form_pattern is None: 
+      results.append(doc)
+      continue
+    form_name = doc['form']['name']
+    if fnmatch(form_name, form_pattern): results.append(doc)
 
   return results
 
 
-def get_requests(shared_folder_id):
+def get_requests(shared_folder_id, verbose=False):
   """get all shared documents requesting a workflow to be performed
   
   Parameters
@@ -231,17 +273,17 @@ def get_requests(shared_folder_id):
   
   Returns
   -------
-  result : list<dict>
+  results : list<dict>
       list of shared Rspace documents using a `Request:*` form
   """
   user_folders = ELN.list_folder_tree(shared_folder_id)
-  result = []
+  results = []
   for folder in user_folders['records']:
-    print(f"{folder['name']}:")#DEBUG
-    result += get_docs_in_folder(folder['id'], 'Request:*')
-    print()#DEBUG
+    if verbose: print(f"{folder['name']} ({folder['id']}):")
+    results += get_docs_in_folder(folder['id'], 'Request:*', verbose=verbose)
+    if verbose: print()
 
-  return result
+  return results
 
 def get_field(document, field_name):
   """get (the first) field from an Rspace document dict with a given name.
