@@ -25,6 +25,7 @@ import os
 from xml.dom.minidom import parseString as parse_xml
 from fnmatch import fnmatch
 from rspace_client.eln import eln
+from rspace_client.inv import inv
 
 class ELNDummy:
   """Dummy ELN object for testing
@@ -44,8 +45,10 @@ class ELNDummy:
 
 try:
   ELN = eln.ELNClient(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
+  Inventory = inv.InventoryClient(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
 except:
   ELN = ELNDummy()
+  Inventory = ELNDummy()
 
 replace = {' ': '_', ',': '.', '<p>': '', '</p>': ''}
 
