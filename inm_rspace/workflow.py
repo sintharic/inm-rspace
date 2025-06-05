@@ -1,3 +1,31 @@
+"""
+----------
+ Examples
+----------
+
+A fully outomated workflow that takes RSpace documents with attached CSV files and plots them:
+
+The Input fields in the RSpace document look like this:
+
+.. image:: images/Input_PlotColumnsCSV.png
+    :alt: Notebook Inputs.
+    :align: center
+
+
+The automatically generated Output field looks like this:
+
+.. image:: images/Output_PlotColumnsCSV.png
+    :alt: Automatically generated Notebook Output.
+    :align: center
+
+The code for this example can be found `here <https://github.com/sintharic/inm-rspace/tree/main/examples>`_.
+
+-------------------
+ API documentation
+-------------------
+
+"""
+
 import os, sys
 import shutil
 import traceback
@@ -106,8 +134,16 @@ class Workflow:
     """Read the keyword arguments from the "Arguments (JSON)" field of the Rspace document.
     """
     kwargs = core.get_field(self.document, 'Arguments (JSON)')['content']
-    if not isinstance(kwargs, str) or kwargs=='' or kwargs is None:
+    if not isinstance(kwargs, str):
       self.kwargs = dict()
+      return
+    
+    kwargs = kwargs.lstrip(' ')
+    kwargs = kwargs.rstrip(' ')
+    print('DEBUG', kwargs)#DEBUG
+    if kwargs=='':
+      self.kwargs = dict()
+      return
     if kwargs[0]!='{': kwargs = '{'+kwargs
     if kwargs[-1]!='}': kwargs = kwargs+'}'
 

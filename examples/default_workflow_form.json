@@ -1,0 +1,47 @@
+{
+  "name": "Request:predefined_workflow",
+  "fields": [
+    {
+      "type": "String",
+      "name": "Workflow",
+      "defaultValue": "PlotColumnsCSV"
+    },
+    {
+      "type": "Text",
+      "name": "Input Data",
+      "defaultValue": ""
+    },
+    {
+      "type": "String",
+      "name": "Arguments (JSON)",
+      "defaultValue": ""
+    },
+    {
+      "type": "String",
+      "name": "Follow up with",
+      "defaultValue": ""
+    },
+    {
+      "type": "Text",
+      "name": "Info",
+      "defaultValue": "<p>This Form has been created to provide a standardized interface to hook up data workflows through the RSpace Python API, defined by the PyPI package <a href=\"https://pypi.org/project/inm-rspace/\">inm-rspace</a>.</p>\n\n<p>In the Field \"Input Data\", insert a file from your Computer or R-Space Gallery, which serves as the input to a Python function. You can pass optional keyword arguments to the underlying Python function(s) via the field \"Arguments (JSON)\".</p>\n\n<p>Finally, to define the Python function(s) to be performed on the input data, create an inm-rspace Workflow as shown in the <a href=\"https://github.com/sintharic/inm-rspace/tree/main/examples\">examples</a>.</p>"
+    },
+    {
+      "type": "Text",
+      "name": "Output Data",
+      "defaultValue": ""
+    },
+    {
+      "type": "Choice",
+      "name": "Completed",
+      "multipleChoice": false,
+      "options": [
+        "yes",
+        "no"
+      ],
+      "defaultOptions": [
+        "no"
+      ]
+    }
+  ]
+}

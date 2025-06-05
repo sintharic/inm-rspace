@@ -3,15 +3,21 @@
  Examples
 ----------
 
-Print a string
+Get all documents in an RSpace Folder or Notebook:
+
+.. image:: images/RSpace_UV-vis.png
+    :alt: Notebook contents.
+    :align: center
 
 .. code-block:: python
 
-    e = print_this('hello')
+    import inm_rspace as rs
+    docs = rs.get_docs_in_notebook(7074)
+    print([doc['name'] for doc in docs])
 
 Output:
 
-.. image:: images/output.png
+.. image:: images/Code_UV-vis.png
     :alt: The generated output.
     :align: center
 
@@ -42,6 +48,19 @@ class ELNDummy:
 
   def get_folder(*args):
     return {'name': ''}
+
+  def get_forms(*args):
+    return {'forms': []}
+
+  def get_form(*args):
+    return {'name': '', 'fields': []}
+
+  def create_form(self, name, fields):
+    return {'name': name, 'fields': fields}
+
+  def publish_form(self, globalId):
+    return
+
 
 try:
   ELN = eln.ELNClient(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
@@ -306,3 +325,78 @@ def get_field(document, field_name):
   for field in document['fields']:
     if field['name']==field_name: return field
   return {}
+
+def field_index(document, field_name):
+  """get index of the (first) field from an Rspace document dict with a given name.
+  
+  Parameters
+  ----------
+  document : dict
+      input document
+  field_name : str
+      name of the field to be accessed
+  
+  Returns
+  -------
+  idx : int
+      the index of the field with the given name
+  """
+  for idx, field in enumerate(document['fields']):
+    if field['name']==field_name: return idx
+  return -1
+
+def compare_forms(form1, form2):
+  """determine whether or not two forms have identical names and fields.
+  
+  Parameters
+  ----------
+  form1 : dict
+      a dict corresponding to an RSpace form containing at least the keys 'name' and 'fields'.
+  form2 : dict
+      a dict corresponding to an RSpace form containing at least the keys 'name' and 'fields'.
+
+  Returns
+  -------
+  match : bool
+      True if both forms are identical, False otherwise.
+  """
+
+  if form1['name'] != form2['name']: return False
+  field_names1 = [field['name'] for field in form1['fields']]
+  field_names2 = [field['name'] for field in form2['fields']]
+  if len(field_names1) != len(field_names2): return False
+  field_types1 = [field['type'] for field in form1['fields']]
+  field_types2 = [field['type'] for field in form2['fields']]
+  if len(field_types1) != len(field_types2): return False
+
+  for val in field_names1:
+    if val not in field_names2: return False
+  for val in field_types1:
+    if val not in field_types2: return False
+  
+  return True
+
+def get_form_by_dict(new_form):
+  """if it exists, get the Rspace form matching a dict. Otherwise, create a new form first.
+  
+  Parameters
+  ----------
+  new_form : dict
+      a dict corresponding to an RSpace form containing at least the keys 'name' and 'fields'.
+  
+  Returns
+  -------
+  rs_form : dict
+      the found/newly created RSpace form. 
+  """
+  forms = ELN.get_forms()['forms']
+  found_form = False
+  for form in forms:
+    form = ELN.get_form(form['id'])
+    if compare_forms(new_form, form):
+      return form
+  
+  rs_form = ELN.create_form(new_form['name'], fields=new_form['fields'])
+  print(f"Newly created Form: {rs_form['globalId']}")
+  ELN.publish_form(rs_form['globalId'])
+  return rs_form

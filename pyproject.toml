@@ -3,15 +3,20 @@
 
 [tool.poetry]
 name = "inm-rspace"
-version = "0.1.2"
+version = "0.2"
 description = ""
 authors = ["Christian Müller"]
 license = "LICENSE"
 readme = "README.md"
 
-[tool.poetry.dependencies]
-python = ">=3.9"
-numpy = ">=1.23"
+[project]
+dependencies = [
+  "python>=3.9",
+  "numpy>=1.23",
+  "rspace-client", 
+  "matplotlib",
+  "pandas"
+]
 
 [build-system]
 requires = ["poetry-core"]
