@@ -214,12 +214,7 @@ def get_files(document, field_key=None):
     return files
   
   return document['fields'][field_key]['files']
-  # return [(file['globalId'], file['name']) for file in document['fields'][field_key]['files']]
-  # try: 
-  #   return [file['globalId'] for file in document['fields'][field_key]['files']]
-  # except: 
-  #   return []
-
+  
 def get_docs_in_notebook(notebook_id, form_pattern=None, verbose=False):
   """
   scan for Rspace documents in a given folder whose form name matches a pattern

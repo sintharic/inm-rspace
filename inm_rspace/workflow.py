@@ -73,22 +73,38 @@ class Workflow:
     self.name = str(self.__class__.mro()[0]).split('.')[-1][:-2]
     self.document = document
     self.directory = f"{path}{os.sep}{self.name}{os.sep}{self.document['globalId']}_{self.document['name']}"
+    self.time_signature = ''
 
     self.expected = dict()
+    self.field_name = {'input': 'Unknown', 'output': 'Unknown', 'workflow': 'Unknown', 'kwargs': 'Unknown', 'completed': 'Unknown'}
+
     self.description = ''
     self.define()
 
     self.init_members()
 
   def define(self):
-    self.expected['input_files'] = ['*']
-    self.expected['output_files'] = ['*.txt']
+    """Define the properties of the Workflow.
+
+    This function should be redefined for every subclass of Workflow.
+    """
+    self.field_name['workflow'] = 'Workflow'
+    self.field_name['completed'] = 'Completed'
+
+    self.expected['input'] = ['*']
+    self.field_name['input'] = 'Input Data'
+    
+    self.expected['output'] = ['*.txt']
+    self.field_name['output'] = 'Output Data'
+    
     self.expected['kwargs'] = []
+    self.field_name['kwargs'] = 'Arguments (JSON)'
+    
     self.description = ''
 
   def init_members(self):
-    date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    self.info = f"Workflow '{self.name}' initialized from {self.document['globalId']} on {date}.\n"
+    self.time_signature = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    self.info = f"Workflow '{self.name}' initialized from {self.document['globalId']} on {self.time_signature}.\n"
     self.code = 0
     self.traceback = ''
     self.kwargs = dict()
@@ -119,21 +135,26 @@ class Workflow:
   def check_completed(self):
     """Check if the requested workflow has already been completed.
     """
-    completed = core.get_field(self.document, 'Completed')['content']
+    completed = core.get_field(self.document, self.field_name['completed'])['content']
     if completed != 'no': 
       self.code = ERROR_CODE['ALREADY_COMPLETED']
 
   def check_workflow(self):
     """Check if the requested workflow matches this one.
     """
-    workflow = core.get_field(self.document, 'Workflow')['content']
+    if self.field_name['workflow'] is None: return
+
+    workflow = core.get_field(self.document, self.field_name['workflow'])['content']
     if workflow!=self.name: 
       self.code = ERROR_CODE['WRONG_WORKFLOW']
 
   def get_args(self):
-    """Read the keyword arguments from the "Arguments (JSON)" field of the Rspace document.
+    """Read the keyword arguments from the kwargs field of the Rspace document.
     """
-    kwargs = core.get_field(self.document, 'Arguments (JSON)')['content']
+    # if len(self.expected['kwargs']) == 0: return
+    if self.field_name['kwargs'] is None: return
+
+    kwargs = core.get_field(self.document, self.field_name['kwargs'])['content']
     if not isinstance(kwargs, str):
       self.kwargs = dict()
       return
@@ -168,9 +189,9 @@ class Workflow:
     """Check if all expected input files have been provided in the request. 
     If yes, download them.
     """
-    files_found = core.get_files(self.document, 'Input Data')
-    files_matched = [{'name': '__missing__'}]*len(self.expected['input_files'])
-    for ifile, file_pattern in enumerate(self.expected['input_files']):
+    files_found = core.get_files(self.document, self.field_name['input'])
+    files_matched = [{'name': '__missing__'}]*len(self.expected['input'])
+    for ifile, file_pattern in enumerate(self.expected['input']):
       for file in files_found:
         if fnmatch(file['name'], file_pattern): files_matched[ifile] = file
 
@@ -216,13 +237,13 @@ class Workflow:
       msg += 'Request already completed. Nothing to be done.'
     elif ERROR_NAME[self.code] == 'WRONG_WORKFLOW':
       msg += 'Requested workflow does not match.\n'
-      workflow = core.get_field(self.document, 'Workflow')['content']
-      msg += f"Initialized workflow is '{self.name}', but {self.document['globalId']} requests '{workflow}'."
+      workflow = core.get_field(self.document, self.field_name['workflow'])['content']
+      msg += f"Initialized workflow is '{self.name}' with workflow field '{self.field_name['workflow']}', but {self.document['globalId']} requests '{workflow}'."
     elif ERROR_NAME[self.code] == 'WRONG_FILES':
       msg += 'Supplied files do not match.\n'
-      msg += f"Workflow '{self.name}' expects the following files: {self.expected['input_files']}"
+      msg += f"Workflow '{self.name}' expects the following files: {self.expected['input']}"
     elif ERROR_NAME[self.code] == 'WRONG_KWARGS':
-      msg += f"Supplied field 'Arguments (JSON)' is wrong: '{core.get_field(self.document,'Arguments (JSON)')['content']}'\n"
+      msg += f"Supplied field {self.field_name['kwargs']} is wrong: '{core.get_field(self.document, self.field_name['kwargs'])['content']}'\n"
       msg += f"Workflow '{self.name}' expects the following kwargs: {self.expected['kwargs']}\n"
       msg += 'There may be an traceback attached to this field with more info.'
     elif ERROR_NAME[self.code] == 'FAILED_DOWNLOAD':
@@ -267,10 +288,14 @@ class Workflow:
     # print([f['name'] for f in core.ELN.get_form(self.document['form']['id'])['fields']])#DEBUG
     # print([f['name'] for f in fields])#DEBUG
     for i in range(len(fields)):
-      if fields[i]['name']=='Completed' and not self.code:
+      if self.field_name['completed'] is not None and (fields[i]['name']==self.field_name['completed']) and not self.code:
         fields[i]['content'] = 'yes'
-      elif fields[i]['name']=='Output Data':
-        fields[i]['content'] = self.info.replace('\n', '<br/>')
+      elif fields[i]['name']==self.field_name['output']:
+        if self.code == ERROR_CODE['ALREADY_COMPLETED']: 
+          fields[i]['content'] += '<p>'+self.info.replace('\n', '<br/>')+'</p>'
+          continue
+        else:
+          fields[i]['content'] = '<p>'+self.info.replace('\n', '<br/>')+'</p>'
         for upload in uploads:
           fields[i]['content'] += f"<br/>{core.html_ref(upload)}"
 
@@ -280,27 +305,29 @@ class Workflow:
     core.ELN.update_document(self.document['id'], fields=fields)
 
   def reset_document(self):
-    """Reset the request document to an empty 'Output Data' field and 'Completed'='no'.
+    """Reset the request document to an empty 'output' field and 'completed' field 'no'.
     """
 
     fields = self.document['fields']
     for i in range(len(fields)):
-      if fields[i]['name']=='Completed' and fields[i]['content'] == 'yes':
+      if fields[i]['name']==self.field_name['completed'] and fields[i]['content'] == 'yes':
         fields[i]['content'] = 'no'
-      elif fields[i]['name']=='Output Data':
+      elif fields[i]['name']==self.field_name['output']:
         fields[i]['content'] = ''
 
     core.ELN.update_document(self.document['id'], fields=fields)
     print(f"Reset Rspace document {self.document['id']}")
 
   def run(self):
-    """Run the entire workflow.
+    """Run the entire Workflow.
+
+    This function should be redefined for every subclass of Workflow.
     """
 
     self.prepare()
     if not self.code:
       try: self.workflow()
-      except: 
+      except:
         self.code = ERROR_CODE['FAILED_WORKFLOW']
         self.traceback += traceback.format_exc()
     self.update_document()

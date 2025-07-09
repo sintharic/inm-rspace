@@ -3,20 +3,22 @@
 
 [tool.poetry]
 name = "inm-rspace"
-version = "0.2"
-description = ""
+version = "0.4.1"
+description = "Tools for working with the RSpace ELN"
 authors = ["Christian Müller"]
-license = "LICENSE"
+license = "MIT"
 readme = "README.md"
+homepage = "https://github.com/sintharic/inm-rspace"
+repository = "https://github.com/sintharic/inm-rspace"
+documentation = "https://sintharic.github.io/inm-rspace"
+keywords = ["eln", "rspace", "science", "notebook"]
 
-[project]
-dependencies = [
-  "python>=3.9",
-  "numpy>=1.23",
-  "rspace-client", 
-  "matplotlib",
-  "pandas"
-]
+[tool.poetry.dependencies]
+python = ">=3.9"
+numpy = ">=1.23"
+rspace-client = "*"
+matplotlib = "*"
+pandas = "*"
 
 [build-system]
 requires = ["poetry-core"]
