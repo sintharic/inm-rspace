@@ -206,7 +206,9 @@ def get_files(document, field_key=None):
   """
   if isinstance(field_key, str): 
     fields = [f['name'] for f in document['fields']]
-    field_key = fields.index(field_key)
+    try: field_key = fields.index(field_key)
+    except ValueError:
+      return []
   elif field_key is None:
     files = []
     for ifield in range(len(document['fields'])):

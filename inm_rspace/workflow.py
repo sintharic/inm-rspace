@@ -41,12 +41,13 @@ HOME = str(Path.home())
 ERROR_CODE = {
   "SUCCESS": 0,
   "ALREADY_COMPLETED": 1,
-  "WRONG_WORKFLOW": 2,
-  "WRONG_FILES": 3,
-  "WRONG_KWARGS": 4,
-  "FAILED_DOWNLOAD": 5,
-  "FAILED_UPLOAD": 6,
-  "FAILED_WORKFLOW": 7
+  "WRONG_FORM": 2,
+  "WRONG_WORKFLOW": 3,
+  "WRONG_FILES": 4,
+  "WRONG_KWARGS": 5,
+  "FAILED_DOWNLOAD": 6,
+  "FAILED_UPLOAD": 7,
+  "FAILED_WORKFLOW": 8
 }
 ERROR_NAME = {v: k for k, v in ERROR_CODE.items()}
 
@@ -91,7 +92,7 @@ class Workflow:
     self.field_name['workflow'] = 'Workflow'
     self.field_name['completed'] = 'Completed'
 
-    self.expected['input'] = ['*']
+    self.expected['input'] = {'*': -1}
     self.field_name['input'] = 'Input Data'
     
     self.expected['output'] = ['*.txt']
@@ -135,7 +136,11 @@ class Workflow:
   def check_completed(self):
     """Check if the requested workflow has already been completed.
     """
-    completed = core.get_field(self.document, self.field_name['completed'])['content']
+    try: completed = core.get_field(self.document, self.field_name['completed'])['content']
+    except KeyError:
+      self.code = ERROR_CODE['WRONG_FORM']
+      return
+
     if completed != 'no': 
       self.code = ERROR_CODE['ALREADY_COMPLETED']
 
@@ -144,7 +149,11 @@ class Workflow:
     """
     if self.field_name['workflow'] is None: return
 
-    workflow = core.get_field(self.document, self.field_name['workflow'])['content']
+    try: workflow = core.get_field(self.document, self.field_name['workflow'])['content']
+    except KeyError:
+      self.code = ERROR_CODE['WRONG_FORM']
+      return
+
     if workflow!=self.name: 
       self.code = ERROR_CODE['WRONG_WORKFLOW']
 
@@ -154,7 +163,11 @@ class Workflow:
     # if len(self.expected['kwargs']) == 0: return
     if self.field_name['kwargs'] is None: return
 
-    kwargs = core.get_field(self.document, self.field_name['kwargs'])['content']
+    try: kwargs = core.get_field(self.document, self.field_name['kwargs'])['content']
+    except KeyError:
+      self.code = ERROR_CODE['WRONG_FORM']
+      return
+
     if not isinstance(kwargs, str):
       self.kwargs = dict()
       return
@@ -190,17 +203,18 @@ class Workflow:
     If yes, download them.
     """
     files_found = core.get_files(self.document, self.field_name['input'])
-    files_matched = [{'name': '__missing__'}]*len(self.expected['input'])
-    for ifile, file_pattern in enumerate(self.expected['input']):
-      for file in files_found:
-        if fnmatch(file['name'], file_pattern): files_matched[ifile] = file
+    files_matched = {pattern: [] for pattern in self.expected['input'].keys()}
+    for file in files_found:
+      for pattern in self.expected['input'].keys():
+        if fnmatch(file['name'], pattern): files_matched[pattern].append(file)
 
-    for file in files_matched:
-      if file['name']=='__missing__': 
+    for pattern,files in files_matched.items():
+      num = self.expected['input'][pattern]
+      if (num > 0) and (len(files) != num):
         self.code = ERROR_CODE['WRONG_FILES']
         return
-
-    self.download_files(files_matched)
+      
+      self.download_files(files)
 
   def download_files(self, files):
     """Download files from the Rspace Gallery into this workflow's working directory.
@@ -239,12 +253,21 @@ class Workflow:
       msg += 'Requested workflow does not match.\n'
       workflow = core.get_field(self.document, self.field_name['workflow'])['content']
       msg += f"Initialized workflow is '{self.name}' with workflow field '{self.field_name['workflow']}', but {self.document['globalId']} requests '{workflow}'."
+    elif ERROR_NAME[self.code] == 'WRONG_FORM':
+      msg += 'RSpace document\'s form does not match.\n'
+      form = self.document['form']
+      docID = self.document['globalId']
+      fields = [field for field in self.field_name.values() if field is not None]
+      msg += f"Document '{docID}' was created from Form '{form['name']}' ({form['globalId']}), "
+      msg += f"Workflow '{self.name}' expects Form with fields {fields}."
     elif ERROR_NAME[self.code] == 'WRONG_FILES':
       msg += 'Supplied files do not match.\n'
-      msg += f"Workflow '{self.name}' expects the following files: {self.expected['input']}"
+      msg += f"Workflow '{self.name}' expects the following files:"
+      for pattern,num in self.expected['input'].items():
+        msg += f"\n- {num} files matching pattern '{pattern}'"
     elif ERROR_NAME[self.code] == 'WRONG_KWARGS':
       msg += f"Supplied field {self.field_name['kwargs']} is wrong: '{core.get_field(self.document, self.field_name['kwargs'])['content']}'\n"
-      msg += f"Workflow '{self.name}' expects the following kwargs: {self.expected['kwargs']}\n"
+      msg += f"Workflow '{self.name}' supports the following kwargs: {self.expected['kwargs']}\n"
       msg += 'There may be an traceback attached to this field with more info.'
     elif ERROR_NAME[self.code] == 'FAILED_DOWNLOAD':
       msg += 'Unable to download files.\n'
