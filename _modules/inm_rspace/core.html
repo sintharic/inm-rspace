@@ -1,0 +1,584 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>inm_rspace.core &#8212; inm-rspace 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+
+    
+    
+     
+        <script src="../../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">inm-rspace 0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">inm_rspace.core</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for inm_rspace.core</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">----------</span>
+<span class="sd"> Examples</span>
+<span class="sd">----------</span>
+
+<span class="sd">Get all documents in an RSpace Folder or Notebook:</span>
+
+<span class="sd">.. image:: images/RSpace_UV-vis.png</span>
+<span class="sd">    :alt: Notebook contents.</span>
+<span class="sd">    :align: center</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    import inm_rspace as rs</span>
+<span class="sd">    docs = rs.get_docs_in_notebook(7074)</span>
+<span class="sd">    print([doc[&#39;name&#39;] for doc in docs])</span>
+
+<span class="sd">Output:</span>
+
+<span class="sd">.. image:: images/Code_UV-vis.png</span>
+<span class="sd">    :alt: The generated output.</span>
+<span class="sd">    :align: center</span>
+
+<span class="sd">-------------------</span>
+<span class="sd"> API documentation</span>
+<span class="sd">-------------------</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xml.dom.minidom</span><span class="w"> </span><span class="kn">import</span> <span class="n">parseString</span> <span class="k">as</span> <span class="n">parse_xml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fnmatch</span><span class="w"> </span><span class="kn">import</span> <span class="n">fnmatch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rspace_client.eln</span><span class="w"> </span><span class="kn">import</span> <span class="n">eln</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rspace_client.inv</span><span class="w"> </span><span class="kn">import</span> <span class="n">inv</span>
+
+<div class="viewcode-block" id="ELNDummy">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.ELNDummy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ELNDummy</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Dummy ELN object for testing</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span>
+  
+<div class="viewcode-block" id="ELNDummy.list_folder_tree">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.ELNDummy.list_folder_tree">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">list_folder_tree</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;records&#39;</span><span class="p">:</span> <span class="p">[]}</span></div>
+
+  
+<div class="viewcode-block" id="ELNDummy.get_document">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.ELNDummy.get_document">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">get_document</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()}</span></div>
+
+
+<div class="viewcode-block" id="ELNDummy.get_folder">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.ELNDummy.get_folder">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">get_folder</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="ELNDummy.get_forms">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.ELNDummy.get_forms">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">get_forms</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;forms&#39;</span><span class="p">:</span> <span class="p">[]}</span></div>
+
+
+<div class="viewcode-block" id="ELNDummy.get_form">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.ELNDummy.get_form">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">get_form</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;fields&#39;</span><span class="p">:</span> <span class="p">[]}</span></div>
+
+
+<div class="viewcode-block" id="ELNDummy.create_form">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.ELNDummy.create_form">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">create_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;fields&#39;</span><span class="p">:</span> <span class="n">fields</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="ELNDummy.publish_form">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.ELNDummy.publish_form">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">publish_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globalId</span><span class="p">):</span>
+    <span class="k">return</span></div>
+</div>
+
+
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">ELN</span> <span class="o">=</span> <span class="n">eln</span><span class="o">.</span><span class="n">ELNClient</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;RSPACE_URL&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;RSPACE_API_KEY&quot;</span><span class="p">))</span>
+  <span class="n">Inventory</span> <span class="o">=</span> <span class="n">inv</span><span class="o">.</span><span class="n">InventoryClient</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;RSPACE_URL&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;RSPACE_API_KEY&quot;</span><span class="p">))</span>
+<span class="k">except</span><span class="p">:</span>
+  <span class="n">ELN</span> <span class="o">=</span> <span class="n">ELNDummy</span><span class="p">()</span>
+  <span class="n">Inventory</span> <span class="o">=</span> <span class="n">ELNDummy</span><span class="p">()</span>
+
+<span class="n">replace</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39; &#39;</span><span class="p">:</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">:</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;p&gt;&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;/p&gt;&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
+
+
+
+<div class="viewcode-block" id="html_ref">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.html_ref">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">html_ref</span><span class="p">(</span><span class="n">rspace_obj</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;html string to reference an Rspace object</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  rspace_obj : file or document</span>
+<span class="sd">      Rspace object</span>
+<span class="sd">  </span>
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  string : str</span>
+<span class="sd">      string that can be inserted in an html string to reference the given object.</span>
+<span class="sd">  </span>
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      raised if the rspace object type is not recognized</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">link</span> <span class="o">=</span> <span class="n">rspace_obj</span><span class="p">[</span><span class="s1">&#39;_links&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;link&#39;</span><span class="p">]</span>
+  <span class="n">obj_loc</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+  <span class="k">if</span> <span class="n">obj_loc</span><span class="o">==</span><span class="s1">&#39;documents&#39;</span><span class="p">:</span>
+    <span class="n">id_str</span> <span class="o">=</span> <span class="s1">&#39;docId&#39;</span>
+  <span class="k">elif</span> <span class="n">obj_loc</span><span class="o">==</span><span class="s1">&#39;files&#39;</span><span class="p">:</span>
+    <span class="n">id_str</span> <span class="o">=</span> <span class="s1">&#39;fileId&#39;</span>
+  <span class="k">else</span><span class="p">:</span> 
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown rspace object type: </span><span class="si">{</span><span class="n">obj_loc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+  
+  <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="n">id_str</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">rspace_obj</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&gt;&quot;</span></div>
+
+
+<div class="viewcode-block" id="get_line">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.get_line">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_line</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+  <span class="n">idx_beg</span> <span class="o">=</span> <span class="n">idx_end</span> <span class="o">=</span> <span class="n">index</span>
+  <span class="k">while</span> <span class="n">string</span><span class="p">[</span><span class="n">idx_beg</span><span class="p">]</span><span class="o">!=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">idx_beg</span> <span class="o">-=</span> <span class="mi">1</span>
+  <span class="k">while</span> <span class="n">string</span><span class="p">[</span><span class="n">idx_end</span><span class="p">]</span><span class="o">!=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">idx_end</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="k">return</span> <span class="n">string</span><span class="p">[(</span><span class="n">idx_beg</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span><span class="n">idx_end</span><span class="p">]</span></div>
+
+
+
+
+<div class="viewcode-block" id="tables_from_xml">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.tables_from_xml">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tables_from_xml</span><span class="p">(</span><span class="n">xml_string</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="n">replace</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  extract all tabular data from an xml string and save it as a csv file.</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  xml_string : str</span>
+<span class="sd">      input xml string</span>
+<span class="sd">  file : str</span>
+<span class="sd">      file path to use, although an appendix is going to be inserted </span>
+<span class="sd">      to enumerate multiple tables in the xml string.</span>
+<span class="sd">  delimiter : str, optional</span>
+<span class="sd">      field delimiter to be used in the csv file</span>
+<span class="sd">  replace : dict, optional</span>
+<span class="sd">      key,value pairs indicating strings (keys) to be replaced with their corresponding value.</span>
+<span class="sd">  </span>
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  files : list&lt;str&gt;</span>
+<span class="sd">      List of files exported.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># used to name file exports</span>
+  <span class="n">stub</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">ext</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="n">ext</span> <span class="o">=</span> <span class="s1">&#39;.csv&#39;</span>
+
+  <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="c1"># any table is delimited by the tag &#39;tbody&#39;</span>
+    <span class="n">idx_tab_beg</span> <span class="o">=</span> <span class="n">xml_string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;&lt;tbody&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">idx_tab_beg</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="k">break</span>
+    <span class="n">idx_tab_end</span> <span class="o">=</span> <span class="n">xml_string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;&lt;/tbody&gt;&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">8</span>
+
+    <span class="c1"># some replacements are necessary for successful parsing</span>
+    <span class="n">table_str</span> <span class="o">=</span> <span class="n">xml_string</span><span class="p">[</span><span class="n">idx_tab_beg</span><span class="p">:</span><span class="n">idx_tab_end</span><span class="p">]</span>
+    <span class="n">table_str</span> <span class="o">=</span> <span class="n">table_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">table_str</span> <span class="o">=</span> <span class="n">table_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&quot;&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">table_str</span> <span class="o">=</span> <span class="n">table_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;nbsp;&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+
+    <span class="c1"># parse table and save as rows, as indicated by the tag &#39;tr&#39;</span>
+    <span class="n">table_xml</span> <span class="o">=</span> <span class="n">parse_xml</span><span class="p">(</span><span class="n">table_str</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">table_xml</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;tr&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># write the detected table to a file</span>
+    <span class="n">num</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">outfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stub</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">num</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}{</span><span class="n">ext</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">):</span>
+          <span class="k">try</span><span class="p">:</span> 
+            <span class="c1"># cells containing text with formatting of tag &#39;span&#39;</span>
+            <span class="n">sub_elements</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;span&#39;</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">sub_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">firstChild</span><span class="o">.</span><span class="n">nodeValue</span>
+          <span class="k">except</span><span class="p">:</span> 
+            <span class="k">try</span><span class="p">:</span>
+              <span class="c1"># cells containing text with formatting of tag &#39;p&#39;</span>
+              <span class="n">sub_elements</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">getElementsByTagName</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">)</span>
+              <span class="n">value</span> <span class="o">=</span> <span class="n">sub_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">firstChild</span><span class="o">.</span><span class="n">nodeValue</span>
+            <span class="k">except</span><span class="p">:</span>
+              <span class="c1"># cells containing unformatted text</span>
+              <span class="n">value</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">firstChild</span><span class="o">.</span><span class="n">nodeValue</span>
+
+          <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+          <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">replace</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">replace</span><span class="p">[</span><span class="n">char</span><span class="p">])</span>
+
+          <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="o">+</span><span class="n">delimiter</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># remove the processed part from the xml_string before the next iteration</span>
+    <span class="n">xml_string</span> <span class="o">=</span> <span class="n">xml_string</span><span class="p">[</span><span class="n">idx_tab_end</span><span class="p">:]</span>
+
+  <span class="k">return</span> <span class="n">files</span></div>
+
+
+
+
+<div class="viewcode-block" id="get_files">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.get_files">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_files</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">field_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;list files attached to (a field in) an Rspace document</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  document : RspaceDocument</span>
+<span class="sd">      input document</span>
+<span class="sd">  field_key : int or str, optional</span>
+<span class="sd">      name of the field, from which files are extracted. </span>
+<span class="sd">      If None, files from all fields are listed.</span>
+<span class="sd">  </span>
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  files : list&lt;tuple&lt;str,str&gt;&gt;</span>
+<span class="sd">      files found as globalId,filename-pairs.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> 
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">document</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">]]</span>
+    <span class="k">try</span><span class="p">:</span> <span class="n">field_key</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">field_key</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">[]</span>
+  <span class="k">elif</span> <span class="n">field_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ifield</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">document</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">])):</span>
+      <span class="n">files</span> <span class="o">+=</span> <span class="n">get_files</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">ifield</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">files</span>
+  
+  <span class="k">return</span> <span class="n">document</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;files&#39;</span><span class="p">]</span></div>
+
+  
+<div class="viewcode-block" id="get_docs_in_notebook">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.get_docs_in_notebook">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_docs_in_notebook</span><span class="p">(</span><span class="n">notebook_id</span><span class="p">,</span> <span class="n">form_pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  scan for Rspace documents in a given folder whose form name matches a pattern</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  notebook_id : str</span>
+<span class="sd">      notebookID of the Rspace notebook to search for matches</span>
+<span class="sd">  form_pattern : str</span>
+<span class="sd">      glob-style pattern that the form name must match</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  results : list&lt;dict&gt;</span>
+<span class="sd">      list of documents matching the form name</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">records</span> <span class="o">=</span> <span class="n">ELN</span><span class="o">.</span><span class="n">list_folder_tree</span><span class="p">(</span><span class="n">notebook_id</span><span class="p">)</span>
+  <span class="n">nb_name</span> <span class="o">=</span> <span class="n">ELN</span><span class="o">.</span><span class="n">get_folder</span><span class="p">(</span><span class="n">notebook_id</span><span class="p">)[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+  <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">records</span><span class="p">[</span><span class="s1">&#39;records&#39;</span><span class="p">]:</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">ELN</span><span class="o">.</span><span class="n">get_document</span><span class="p">(</span><span class="n">page</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">nb_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="s1">&#39;form&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">form_pattern</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+      <span class="k">continue</span>
+    <span class="n">form_name</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="s1">&#39;form&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">form_name</span><span class="p">,</span> <span class="n">form_pattern</span><span class="p">):</span> <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="get_docs_in_folder">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.get_docs_in_folder">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_docs_in_folder</span><span class="p">(</span><span class="n">folder_id</span><span class="p">,</span> <span class="n">form_pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  scan for Rspace documents in a given folder whose form name matches a pattern</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  folder_id : str</span>
+<span class="sd">      folderID of the Rspace folder to search for matches</span>
+<span class="sd">  form_pattern : str</span>
+<span class="sd">      glob-style pattern that the form name must match</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  results : list&lt;dict&gt;</span>
+<span class="sd">      list of documents matching the form name</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">records</span> <span class="o">=</span> <span class="n">ELN</span><span class="o">.</span><span class="n">list_folder_tree</span><span class="p">(</span><span class="n">folder_id</span><span class="p">)</span>
+  <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">share</span> <span class="ow">in</span> <span class="n">records</span><span class="p">[</span><span class="s1">&#39;records&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">share</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;NOTEBOOK&#39;</span><span class="p">:</span>
+      <span class="n">results</span> <span class="o">+=</span> <span class="n">get_docs_in_notebook</span><span class="p">(</span><span class="n">share</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">form_pattern</span><span class="o">=</span><span class="n">form_pattern</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+      <span class="k">continue</span>
+    
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">ELN</span><span class="o">.</span><span class="n">get_document</span><span class="p">(</span><span class="n">share</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="s1">&#39;form&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">form_pattern</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+      <span class="k">continue</span>
+    <span class="n">form_name</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="s1">&#39;form&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">form_name</span><span class="p">,</span> <span class="n">form_pattern</span><span class="p">):</span> <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<div class="viewcode-block" id="get_requests">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.get_requests">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_requests</span><span class="p">(</span><span class="n">shared_folder_id</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;get all shared documents requesting a workflow to be performed</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  shared_folder_id : str</span>
+<span class="sd">      folderId of the &quot;Shared&quot; Folder in Rspace</span>
+<span class="sd">  </span>
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  results : list&lt;dict&gt;</span>
+<span class="sd">      list of shared Rspace documents using a `Request:*` form</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">user_folders</span> <span class="o">=</span> <span class="n">ELN</span><span class="o">.</span><span class="n">list_folder_tree</span><span class="p">(</span><span class="n">shared_folder_id</span><span class="p">)</span>
+  <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">user_folders</span><span class="p">[</span><span class="s1">&#39;records&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">folder</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">folder</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">+=</span> <span class="n">get_docs_in_folder</span><span class="p">(</span><span class="n">folder</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="s1">&#39;Request:*&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">()</span>
+
+  <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="get_field">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.get_field">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_field</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;get (the first) field from an Rspace document dict with a given name.</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  document : dict</span>
+<span class="sd">      input document</span>
+<span class="sd">  field_name : str</span>
+<span class="sd">      name of the field to be accessed</span>
+<span class="sd">  </span>
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  field : dict</span>
+<span class="sd">      field with the given name</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">document</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">field_name</span><span class="p">:</span> <span class="k">return</span> <span class="n">field</span>
+  <span class="k">return</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="field_index">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.field_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">field_index</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;get index of the (first) field from an Rspace document dict with a given name.</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  document : dict</span>
+<span class="sd">      input document</span>
+<span class="sd">  field_name : str</span>
+<span class="sd">      name of the field to be accessed</span>
+<span class="sd">  </span>
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  idx : int</span>
+<span class="sd">      the index of the field with the given name</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">document</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">field_name</span><span class="p">:</span> <span class="k">return</span> <span class="n">idx</span>
+  <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="compare_forms">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.compare_forms">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compare_forms</span><span class="p">(</span><span class="n">form1</span><span class="p">,</span> <span class="n">form2</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;determine whether or not two forms have identical names and fields.</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  form1 : dict</span>
+<span class="sd">      a dict corresponding to an RSpace form containing at least the keys &#39;name&#39; and &#39;fields&#39;.</span>
+<span class="sd">  form2 : dict</span>
+<span class="sd">      a dict corresponding to an RSpace form containing at least the keys &#39;name&#39; and &#39;fields&#39;.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  match : bool</span>
+<span class="sd">      True if both forms are identical, False otherwise.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">form1</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">form2</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span> <span class="k">return</span> <span class="kc">False</span>
+  <span class="n">field_names1</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">form1</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">]]</span>
+  <span class="n">field_names2</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">form2</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">]]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_names1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_names2</span><span class="p">):</span> <span class="k">return</span> <span class="kc">False</span>
+  <span class="n">field_types1</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">form1</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">]]</span>
+  <span class="n">field_types2</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">form2</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">]]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_types1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_types2</span><span class="p">):</span> <span class="k">return</span> <span class="kc">False</span>
+
+  <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">field_names1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field_names2</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+  <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">field_types1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field_types2</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+  
+  <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="get_form_by_dict">
+<a class="viewcode-back" href="../../inm_rspace.core.html#inm_rspace.core.get_form_by_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_form_by_dict</span><span class="p">(</span><span class="n">new_form</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;if it exists, get the Rspace form matching a dict. Otherwise, create a new form first.</span>
+<span class="sd">  </span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  new_form : dict</span>
+<span class="sd">      a dict corresponding to an RSpace form containing at least the keys &#39;name&#39; and &#39;fields&#39;.</span>
+<span class="sd">  </span>
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  rs_form : dict</span>
+<span class="sd">      the found/newly created RSpace form. </span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">forms</span> <span class="o">=</span> <span class="n">ELN</span><span class="o">.</span><span class="n">get_forms</span><span class="p">()[</span><span class="s1">&#39;forms&#39;</span><span class="p">]</span>
+  <span class="n">found_form</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="n">forms</span><span class="p">:</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">ELN</span><span class="o">.</span><span class="n">get_form</span><span class="p">(</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">compare_forms</span><span class="p">(</span><span class="n">new_form</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">form</span>
+  
+  <span class="n">rs_form</span> <span class="o">=</span> <span class="n">ELN</span><span class="o">.</span><span class="n">create_form</span><span class="p">(</span><span class="n">new_form</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">fields</span><span class="o">=</span><span class="n">new_form</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">])</span>
+  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Newly created Form: </span><span class="si">{</span><span class="n">rs_form</span><span class="p">[</span><span class="s1">&#39;globalId&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+  <span class="n">ELN</span><span class="o">.</span><span class="n">publish_form</span><span class="p">(</span><span class="n">rs_form</span><span class="p">[</span><span class="s1">&#39;globalId&#39;</span><span class="p">])</span>
+  <span class="k">return</span> <span class="n">rs_form</span></div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">inm-rspace 0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">inm_rspace.core</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Christian Müller.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
