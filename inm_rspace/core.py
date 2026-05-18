@@ -33,41 +33,35 @@ from fnmatch import fnmatch
 from rspace_client.eln import eln
 from rspace_client.inv import inv
 
-class ELNDummy:
+class ELNClass(eln.ELNClient):
   """Dummy ELN object for testing
   """
   
   def __init__(self):
     return
-  
-  def list_folder_tree(*args):
-    return {'records': []}
-  
-  def get_document(*args):
-    return {'name': '', 'form': dict()}
 
-  def get_folder(*args):
-    return {'name': ''}
+  def connect(self, url, key):
+    # self = eln.ELNClient(url, key)
+    eln.ELNClient.__init__(self, url, key)
 
-  def get_forms(*args):
-    return {'forms': []}
-
-  def get_form(*args):
-    return {'name': '', 'fields': []}
-
-  def create_form(self, name, fields):
-    return {'name': name, 'fields': fields}
-
-  def publish_form(self, globalId):
+class InventoryClass(inv.InventoryClient):
+  """Dummy Inventory object for testing
+  """
+  def __init__(self):
     return
 
+  def connect(self, url, key):
+    inv.InventoryClient.__init__(self, url, key)
+
+
+ELN = ELNClass()
+Inventory = InventoryClass()
 
 try:
-  ELN = eln.ELNClient(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
-  Inventory = inv.InventoryClient(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
+  ELN.connect(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
+  Inventory.connect(os.getenv("RSPACE_URL"), os.getenv("RSPACE_API_KEY"))
 except:
-  ELN = ELNDummy()
-  Inventory = ELNDummy()
+  pass
 
 replace = {' ': '_', ',': '.', '<p>': '', '</p>': ''}
 

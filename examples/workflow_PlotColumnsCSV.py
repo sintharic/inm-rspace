@@ -8,13 +8,10 @@ import matplotlib.pyplot as plt
 # Create a new RSpace Workflow
 
 class PlotColumnsCSV(rs.workflow.Workflow):
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    self.define()
-
+  
   def define(self):
-    self.expected['input'] = ['*.csv']
-    self.expected['output'] = ['*.png']
+    self.expected['input'] = {'*.csv': 1}
+    self.expected['output'] = {'*.png': 1}
     self.expected['kwargs'] = {'x': 1, 'y': 2}
 
     self.field_name['input'] = 'Input Data'
