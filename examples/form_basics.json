@@ -1,0 +1,47 @@
+{
+  "name": "inm-rspace_form_basics",
+  "fields": [
+    {
+      "name": "date",
+      "type": "Date",
+      "defaultValue": "2011-11-11"
+    },
+    {
+      "name": "numeric",
+      "type": "Number",
+      "defaultValue": 1.0,
+      "max": 100,
+      "min": 0,
+      "decimalPlaces": 1
+    },
+    {
+      "name": "string",
+      "type": "String",
+      "defaultValue": "Hello, world!"
+    },
+    {
+      "name": "choice",
+      "type": "Choice",
+      "defaultOptions": ["great", "okay"],
+      "options": ["great", "okay", "bad"],
+      "allowMultiple": false
+    },
+    {
+      "name": "radio",
+      "type": "Radio",
+      "defaultOption": "great",
+      "options": ["great", "okay", "bad"]
+    },
+    {
+      "name": "radio-picklist",
+      "type": "Radio",
+      "defaultOption": "bad",
+      "options": ["great", "okay", "bad"],
+      "showAsPickList": true
+    },
+    {
+      "name": "free-form text",
+      "type": "Text"
+    }
+  ]
+}

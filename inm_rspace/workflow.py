@@ -70,6 +70,12 @@ def get_file_paths(field):
 
 
 class Workflow:
+  """Parent class defining an API for Python workflows that are executed on
+  RSpace documents.
+
+  In order to define a new workflow, declare it as a subclass of this Workflow 
+  class and redefine the functions `define(self)` and `workflow(...)`.
+  """
   def __init__(self, document: dict, path=HOME):
     self.name = str(self.__class__.mro()[0]).split('.')[-1][:-2]
     self.document = document
@@ -87,9 +93,24 @@ class Workflow:
   def define(self):
     """Define the properties of the Workflow.
 
-    This function should be redefined for every subclass of Workflow.
+    This function should be redefined for every newly created subclass of Workflow.
+
+    To request a Workflow, an RSpace document must contain at least
+    the following categories fields, whose field names you specify here:
+
+- `self.field_name['completed']`: a tick box for whether or not the workflow was completed
+- `self.field_name['input']`: a 'Text' field to which you attach the input files to the workflow
+- `self.field_name['output']`: a 'Text' field to which the workflow attaches its output files
+
+    In addition to the mandatory fields, you can also define the following:
+
+- `self.field_name['kwargs']`: a 'String' field that contains valid keyword arguments (defined by 
+  `self.expected['kwargs']`) to the member function `self.workflow`.
+- `self.field_name['workflow']`: a 'String' field which lets you specify the workflow you want to execute. 
+  If used, the workflow will only execute if its Python class name matches the content of this field.
+  Otherwise, the workflow will always execute if all the necessary fields are present.
+  Having this option lets you create RSpace Forms eligible for more than one workflow.
     """
-    self.field_name['workflow'] = 'Workflow'
     self.field_name['completed'] = 'Completed'
 
     self.expected['input'] = {'*': -1}
@@ -98,12 +119,19 @@ class Workflow:
     self.expected['output'] = {'*.txt': 1}
     self.field_name['output'] = 'Output Data'
     
+    # OPTIONAL
+    self.field_name['workflow'] = 'Workflow'
+
+    # OPTIONAL
     self.expected['kwargs'] = []
     self.field_name['kwargs'] = 'Arguments (JSON)'
     
+    # OPTIONAL BUT HIGHLY RECOMMENDED
     self.description = ''
 
   def init_members(self):
+    """Initialize all internal variables.
+    """
     self.time_signature = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     self.info = f"Workflow '{self.name}' initialized from {self.document['globalId']} on {self.time_signature}.\n"
     self.code = 0
@@ -149,6 +177,7 @@ class Workflow:
 
   def check_workflow(self):
     """Check if the requested workflow matches this one.
+    This returns immediately if `field_name['workflow'] is None`.
     """
     if self.field_name['workflow'] is None: return
 
@@ -237,7 +266,9 @@ class Workflow:
       self.input_files.append(filepath)
 
   def workflow(self, **kwargs):
-    """The actual workflow to be executed
+    """The actual workflow to be executed.
+
+    This function should be redefined for every subclass of this Workflow class.
     """
     if not self.code: 
       self.info += f"Successfully downloaded files: {[file['name'] for file in self.input_files]}\n"
@@ -351,7 +382,9 @@ class Workflow:
   def run(self):
     """Run the entire Workflow.
 
-    This function should be redefined for every subclass of Workflow.
+    This function is typically the same for every subclass of this Workflow class.
+    It calls `self.workflow(...)`, which is where you put the actual backend of
+    the workflow.
     """
 
     self.prepare()

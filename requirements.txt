@@ -1,4 +1,8 @@
 rspace-client
+
+ipython
+
 numpy
 scipy
 matplotlib
+PyQt6

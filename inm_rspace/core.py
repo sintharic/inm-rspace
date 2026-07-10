@@ -28,6 +28,7 @@ Output:
 """
 
 import os
+from datetime import datetime
 from xml.dom.minidom import parseString as parse_xml
 from fnmatch import fnmatch
 from rspace_client.eln import eln
@@ -276,6 +277,7 @@ def get_docs_in_folder(folder_id, form_pattern=None, verbose=False):
   return results
 
 
+
 def get_requests(shared_folder_id, verbose=False):
   """get all shared documents requesting a workflow to be performed
   
@@ -297,6 +299,8 @@ def get_requests(shared_folder_id, verbose=False):
     if verbose: print()
 
   return results
+
+
 
 def get_field(document, field_name):
   """get (the first) field from an Rspace document dict with a given name.
@@ -336,58 +340,178 @@ def field_index(document, field_name):
     if field['name']==field_name: return idx
   return -1
 
+
+
+def forms_are_compatible(form1, form2, subset=False):
+    """determine whether or not two forms have identical names and fields.
+    
+    Parameters
+    ----------
+    form1 : dict
+        an RSpace Form-style dict containing at least the keys 'name' and 'fields'.
+    
+    form2 : dict
+        an RSpace Form-style dict containing at least the keys 'name' and 'fields'.
+
+    subset : bool
+        if `True`, the function only checks whether the fields of <form1> are 
+        a subset of the fields in <form2>.
+  
+    Returns
+    -------
+    match : bool
+        True if both forms are identical, False otherwise.
+    """
+
+    if subset:
+        field_names2 = [field['name'] for field in form2['fields']]
+        field_types2 = [field['type'] for field in form2['fields']]
+
+        for field1 in form1['fields']:
+            try: 
+                idx = field_names2.index(field1['name'])
+                if field_types2[idx] != field1['type']: return False
+            except:
+                return False
+
+        return True
+
+    if form1['name'] != form2['name']: 
+        return False
+
+    if len(form1['fields']) != len(form2['fields']):
+        return False
+
+    for field1, field2 in zip(form1['fields'], form2['fields']):
+        # if field1 != field2: return False
+        if field1['name'] != field2['name']: return False
+        if field1['type'] != field2['type']: return False
+
+    return True
+
+
+
 def compare_forms(form1, form2):
-  """determine whether or not two forms have identical names and fields.
-  
-  Parameters
-  ----------
-  form1 : dict
-      a dict corresponding to an RSpace form containing at least the keys 'name' and 'fields'.
-  form2 : dict
-      a dict corresponding to an RSpace form containing at least the keys 'name' and 'fields'.
+    """Deprecated version of forms_are_compatible.
+    """
+    print('WARNING: compare_forms() is deprecated. Use forms_match() instead.')
+    return forms_are_compatible(form1, form2, subset=False)
 
-  Returns
-  -------
-  match : bool
-      True if both forms are identical, False otherwise.
-  """
 
-  if form1['name'] != form2['name']: return False
-  field_names1 = [field['name'] for field in form1['fields']]
-  field_names2 = [field['name'] for field in form2['fields']]
-  if len(field_names1) != len(field_names2): return False
-  field_types1 = [field['type'] for field in form1['fields']]
-  field_types2 = [field['type'] for field in form2['fields']]
-  if len(field_types1) != len(field_types2): return False
 
-  for val in field_names1:
-    if val not in field_names2: return False
-  for val in field_types1:
-    if val not in field_types2: return False
-  
-  return True
+def document_fields_from_json(json_dict:dict):
+    """Convert a JSON-style dict with key,value pairs into 
+    an RSpace document definition of format 
+    [{'name': <key>, 'content': <value>}, ...]
+    
+    Parameters
+    ----------
+    json_dict : dict
+        JSON-style dict
+    
+    Returns
+    -------
+    list<dict>
+        RSpace document-style list of {'name': ..., 'content': ...} dicts.
+    """
+    return [{'name': key, 'content': json_dict[key]} for key in json_dict.keys()]
 
-def get_form_by_dict(new_form):
-  """if it exists, get the Rspace form matching a dict. Otherwise, create a new form first.
-  
-  Parameters
-  ----------
-  new_form : dict
-      a dict corresponding to an RSpace form containing at least the keys 'name' and 'fields'.
-  
-  Returns
-  -------
-  rs_form : dict
-      the found/newly created RSpace form. 
-  """
-  forms = ELN.get_forms()['forms']
-  found_form = False
-  for form in forms:
-    form = ELN.get_form(form['id'])
-    if compare_forms(new_form, form):
-      return form
-  
-  rs_form = ELN.create_form(new_form['name'], fields=new_form['fields'])
-  print(f"Newly created Form: {rs_form['globalId']}")
-  ELN.publish_form(rs_form['globalId'])
-  return rs_form
+
+
+def form_fields_from_json(json_dict:dict, default:bool=False):
+    """Convert a JSON-style dict with key,value pairs into 
+    an RSpace Form Field list of format
+    [{'name': <key>, 'type': type(<value>)}, ...]
+    
+    Parameters
+    ----------
+    json_dict : dict
+        JSON-style dict
+
+    default : bool
+        if `True`, supplied values in the JSON-style dict are considered to be 
+        the default in the RSpace Form.
+    
+    Returns
+    -------
+    list<dict>
+        RSpace Form Field list of {'name': ..., 'type': ..., (...)} dicts.
+    """
+    result = []
+    for key in json_dict.keys():
+        field = {'name': key}
+        value = json_dict[key]
+        if isinstance(value, (list, tuple, set)):
+            if not len(value): 
+                field['type'] = 'Text'
+                continue
+            field['type'] = 'Choice'
+            field['options'] = [str(element) for element in value]
+        elif isinstance(value, bool):
+            field['type'] = 'Radio'
+            field['options'] = ['yes', 'no']
+        elif isinstance(value, int):
+            field['type'] = 'Number'
+            field['decimalPlaces'] = 0
+        elif isinstance(value, float):
+            field['type'] = 'Number'
+            field['decimalPlaces'] = len(f'{val:.g}')-len(str(int(value)))
+        elif isinstance(value, datetime):
+            field['type'] = 'Date'
+            value = value.strftime('%Y-%m-%d')
+        elif isinstance(value, str):
+            try:
+                date = datetime.fromisoformat(value)
+                value = date.strftime('%Y-%m-%d')
+                field['type'] = 'Date'
+            except:
+                field['type'] = 'String'
+        else: 
+            field['type'] = 'Text'
+
+        if default:
+            if field['type'] == 'Radio':
+                if value: field['defaultOption'] = 'yes'
+                else: field['defaultOption'] = 'no'
+            elif field['type'] == 'Choice':
+                field['defaultOptions'] = field['options']
+            elif field['type'] in ('Date', 'String', 'Number'):
+                field['defaultValue'] = value
+
+        result.append(field)
+
+    return result
+
+
+
+def get_form_by_dict(new_form, subset=False):
+    """If it exists, return the (first) Rspace Form matching a given 
+    RSpace Form definition dict. Otherwise, create a new Form and return that.
+    
+    Parameters
+    ----------
+    new_form : dict
+        a dict corresponding to an RSpace Form definition containing at least 
+        the keys 'name' and 'fields'.
+
+    subset : bool
+        if `True`, the function only checks whether the fields of <new_form> 
+        are a subset of the fields in an existing RSpace Form.
+    
+    Returns
+    -------
+    rs_form : dict
+        the found/newly created RSpace form. 
+    """
+    forms = ELN.get_forms()['forms']
+    found_form = False
+    for form in forms:
+        form = ELN.get_form(form['id'])
+        if forms_are_compatible(new_form, form, subset=subset):
+            return form
+    
+    rs_form = ELN.create_form(new_form['name'], fields=new_form['fields'])
+    print(f"No matching Form found. Publishing new Form: {rs_form['globalId']}")
+    ELN.publish_form(rs_form['globalId'])
+
+    return rs_form

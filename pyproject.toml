@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "inm-rspace"
-version = "0.4.3"
+version = "1.0.0"
 description = "Tools for working with the RSpace ELN"
 authors = ["Christian Müller"]
 license = "MIT"
