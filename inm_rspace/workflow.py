@@ -3,7 +3,7 @@
  Examples
 ----------
 
-A fully outomated workflow that takes RSpace documents with attached CSV files and plots them:
+A fully automated workflow that takes RSpace documents with attached CSV files and plots them:
 
 The Input fields in the RSpace document look like this:
 
@@ -73,8 +73,11 @@ class Workflow:
   """Parent class defining an API for Python workflows that are executed on
   RSpace documents.
 
-  In order to define a new workflow, declare it as a subclass of this Workflow 
-  class and redefine the functions `define(self)` and `workflow(...)`.
+  In order to define a new workflow, 
+- declare a new Python class as subclass of this `Workflow` class
+- in that class, redefine functions `define(self)` and `workflow(self, ...)`.
+  (see documentation of those functions below and `this example workflow 
+  <https://github.com/sintharic/inm-rspace/blob/main/examples/workflow_PlotColumnsCSV.py>`_.
   """
   def __init__(self, document: dict, path=HOME):
     self.name = str(self.__class__.mro()[0]).split('.')[-1][:-2]
@@ -93,23 +96,31 @@ class Workflow:
   def define(self):
     """Define the properties of the Workflow.
 
-    This function should be redefined for every newly created subclass of Workflow.
+    This function should be redefined for every newly created subclass of 
+    `Workflow`.
 
     To request a Workflow, an RSpace document must contain at least
     the following categories fields, whose field names you specify here:
 
-- `self.field_name['completed']`: a tick box for whether or not the workflow was completed
-- `self.field_name['input']`: a 'Text' field to which you attach the input files to the workflow
-- `self.field_name['output']`: a 'Text' field to which the workflow attaches its output files
+- `self.field_name['completed']`: a 'yes'/'no' tick box specifying whether 
+  the workflow was already completed. The workflow will only run if this field
+  says 'no' and automatically update it to 'yes' upon successful completion.
+- `self.field_name['input']`: a 'Text' field to which you attach the input files
+  to the workflow
+- `self.field_name['output']`: a 'Text' field to which the workflow attaches its 
+  output files
 
     In addition to the mandatory fields, you can also define the following:
 
-- `self.field_name['kwargs']`: a 'String' field that contains valid keyword arguments (defined by 
-  `self.expected['kwargs']`) to the member function `self.workflow`.
-- `self.field_name['workflow']`: a 'String' field which lets you specify the workflow you want to execute. 
-  If used, the workflow will only execute if its Python class name matches the content of this field.
-  Otherwise, the workflow will always execute if all the necessary fields are present.
-  Having this option lets you create RSpace Forms eligible for more than one workflow.
+- `self.field_name['kwargs']`: a 'String' field that contains valid keyword 
+  arguments (defined by `self.expected['kwargs']`) to the member function 
+  `self.workflow`.
+- `self.field_name['workflow']`: a 'String' field which lets you specify the 
+  workflow you want to execute. 
+  If used, the workflow will only execute if its Python class name matches the 
+  content of this field.
+  Otherwise, it will always execute if all the necessary fields are present.
+  This option lets you create RSpace Forms eligible for more than one workflow.
     """
     self.field_name['completed'] = 'Completed'
 
@@ -219,6 +230,14 @@ class Workflow:
       self.code = ERROR_CODE['WRONG_KWARGS']
 
   def check_args(self, fun):
+    """Check if the keyword arguments provided to the workflow actually match
+    the valid keyword arguments of a given Python function
+    
+    Parameters
+    ----------
+    fun : function
+        The Python functions whose kwargs to check
+    """
     if len(self.kwargs)==0: return
     try:
       kwdefaults = fun.__kwdefaults__

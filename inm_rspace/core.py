@@ -4,6 +4,7 @@
 ----------
 
 Get all documents in an RSpace Folder or Notebook:
+--------------------------------------------------
 
 .. image:: images/RSpace_UV-vis.png
     :alt: Notebook contents.
@@ -21,6 +22,19 @@ Output:
     :alt: The generated output.
     :align: center
 
+Create a new RSpace Form from a JSON metadata file:
+---------------------------------------------------
+
+.. code-block:: python
+
+    json_content = json.load(open('metadata.json'))
+    form_fields = rs.form_fields_from_json(json_content, default=True)
+    rs_form = rs.ELN.create_form('inm-rspace_json', fields=form_fields)
+    print(f"Created form {rs_form['globalId']}")
+
+For more examples on managing JSON schemas and RSpace Forms, refer to `this script 
+<https://github.com/sintharic/inm-rspace/blob/main/examples/manage_forms.py>`_.
+
 -------------------
  API documentation
 -------------------
@@ -35,7 +49,7 @@ from rspace_client.eln import eln
 from rspace_client.inv import inv
 
 class ELNClass(eln.ELNClient):
-  """Dummy ELN object for testing
+  """ELN class enhancing the rspace_client.eln.ELNClient class
   """
   
   def __init__(self):
@@ -46,7 +60,7 @@ class ELNClass(eln.ELNClient):
     eln.ELNClient.__init__(self, url, key)
 
 class InventoryClass(inv.InventoryClient):
-  """Dummy Inventory object for testing
+  """Inventory class enhancing the rspace_client.inv.InventoryClient class
   """
   def __init__(self):
     return
@@ -342,8 +356,54 @@ def field_index(document, field_name):
 
 
 
+def fields_are_compatible(fields1, fields2, subset=False):
+    """determine whether two field lists are identical (or one is a subset of the
+    other).
+    
+    Parameters
+    ----------
+    fields1 : dict
+        a list of RSpace field dicts containing at least the keys 'name' and 'type'.
+    
+    fields2 : dict
+        a list of RSpace field dicts containing at least the keys 'name' and 'type'.
+
+    subset : bool
+        if `True`, the function only checks whether the fields of <form1> are 
+        a subset of the fields in <form2>.
+  
+    Returns
+    -------
+    match : bool
+        True if both forms are compatible, False otherwise.
+    """
+
+    if subset:
+        field_names2 = [field['name'] for field in fields2]
+        field_types2 = [field['type'] for field in fields2]
+
+        for field1 in fields1:
+            try: 
+                idx = field_names2.index(field1['name'])
+                if field_types2[idx] != field1['type']: return False
+            except:
+                return False
+
+    else:
+        if len(fields1) != len(fields2):
+            return False
+
+        for field1, field2 in zip(fields1, fields2):
+            # if field1 != field2: return False
+            if field1['name'] != field2['name']: return False
+            if field1['type'] != field2['type']: return False
+
+    return True
+
+
 def forms_are_compatible(form1, form2, subset=False):
-    """determine whether or not two forms have identical names and fields.
+    """determine whether two forms are identical (or one is a subset of the 
+    other).
     
     Parameters
     ----------
@@ -360,34 +420,16 @@ def forms_are_compatible(form1, form2, subset=False):
     Returns
     -------
     match : bool
-        True if both forms are identical, False otherwise.
+        True if both forms are compatible, False otherwise.
     """
 
     if subset:
-        field_names2 = [field['name'] for field in form2['fields']]
-        field_types2 = [field['type'] for field in form2['fields']]
-
-        for field1 in form1['fields']:
-            try: 
-                idx = field_names2.index(field1['name'])
-                if field_types2[idx] != field1['type']: return False
-            except:
-                return False
-
-        return True
+        return fields_are_compatible(form1['fields'], form2['fields'], subset=True)
 
     if form1['name'] != form2['name']: 
         return False
 
-    if len(form1['fields']) != len(form2['fields']):
-        return False
-
-    for field1, field2 in zip(form1['fields'], form2['fields']):
-        # if field1 != field2: return False
-        if field1['name'] != field2['name']: return False
-        if field1['type'] != field2['type']: return False
-
-    return True
+    return fields_are_compatible(form1['fields'], form2['fields'], subset=False)
 
 
 
@@ -400,9 +442,8 @@ def compare_forms(form1, form2):
 
 
 def document_fields_from_json(json_dict:dict):
-    """Convert a JSON-style dict with key,value pairs into 
-    an RSpace document definition of format 
-    [{'name': <key>, 'content': <value>}, ...]
+    """Convert a JSON-style dict with key,value pairs into a list of
+    RSpace document fields of format `[{'name': <key>, 'content': <value>}, ...]`
     
     Parameters
     ----------
@@ -419,9 +460,8 @@ def document_fields_from_json(json_dict:dict):
 
 
 def form_fields_from_json(json_dict:dict, default:bool=False):
-    """Convert a JSON-style dict with key,value pairs into 
-    an RSpace Form Field list of format
-    [{'name': <key>, 'type': type(<value>)}, ...]
+    """Convert a JSON-style dict with key,value pairs into a list of
+    RSpace Form fields of format `[{'name': <key>, 'type': type(<value>)}, ...]`
     
     Parameters
     ----------
@@ -435,7 +475,7 @@ def form_fields_from_json(json_dict:dict, default:bool=False):
     Returns
     -------
     list<dict>
-        RSpace Form Field list of {'name': ..., 'type': ..., (...)} dicts.
+        RSpace Form field list of {'name': ..., 'type': ..., (...)} dicts.
     """
     result = []
     for key in json_dict.keys():
@@ -455,7 +495,7 @@ def form_fields_from_json(json_dict:dict, default:bool=False):
             field['decimalPlaces'] = 0
         elif isinstance(value, float):
             field['type'] = 'Number'
-            field['decimalPlaces'] = len(f'{val:.g}')-len(str(int(value)))
+            field['decimalPlaces'] = len(f'{value:g}')-len(str(int(value)))
         elif isinstance(value, datetime):
             field['type'] = 'Date'
             value = value.strftime('%Y-%m-%d')
@@ -486,7 +526,7 @@ def form_fields_from_json(json_dict:dict, default:bool=False):
 
 def get_form_by_dict(new_form, subset=False):
     """If it exists, return the (first) Rspace Form matching a given 
-    RSpace Form definition dict. Otherwise, create a new Form and return that.
+    RSpace Form definition dict. Otherwise, create this Form and return it.
     
     Parameters
     ----------
