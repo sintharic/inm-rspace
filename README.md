@@ -12,17 +12,17 @@ You can install `inm-rspace` through PyPI, which should automatically take care 
 
 `pip install inm-rspace`
 
-However, to use the API, you need to first create an API key as explained [here](https://documentation.researchspace.com/article/v0dxtfvj7u-rspace-api-introduction).
-Furthermore, `inm-rspace` assumes you have saved this API key as `RSPACE_API_KEY` along with your RSpace URL as `RSPACE_URL` (e.g. https://leibniz-inm.researchspace.com) as environment variables in your terminal.
+To use the API, you need to first create an API key as explained [here](https://documentation.researchspace.com/article/v0dxtfvj7u-rspace-api-introduction).
+As soon as you import `inm-rspace`, it will try to connect to RSpace automatically by checking if you have saved your API key as `RSPACE_API_KEY` along with your RSpace URL as `RSPACE_URL` (e.g. https://leibniz-inm.researchspace.com) as environment variables in your terminal.
+If you haven't, you can connect using the included `connect(url, key)` method instead.
+For convenience, it is recommended to use the environment variables.
+For app development, it is recommended to use Python's `keyring` package to manage API keys instead to avoid saving secrets in plain text.
 
 
-## Examples
 
-To learn how to generally use the `rspace-client` API, please refer to their [examples](https://github.com/rspace-os/rspace-client-python/tree/master/examples).
+## Documentation and Examples
+
+To learn how to generally use the `rspace-client` API, please refer to the official [examples](https://github.com/rspace-os/rspace-client-python/tree/master/examples).
 
 As for how to use the `inm-rspace` extension for workflows, check the `examples` folder of this repository.
-
-
-## Documentation
-
-The full API documentation is still in progress, but the current state is already available [here](https://sintharic.github.io/inm-rspace/).
+The full API documentation is available [here](https://sintharic.github.io/inm-rspace/).
