@@ -436,7 +436,7 @@ def forms_are_compatible(form1, form2, subset=False):
 def compare_forms(form1, form2):
     """Deprecated version of forms_are_compatible.
     """
-    print('WARNING: compare_forms() is deprecated. Use forms_match() instead.')
+    print('WARNING: compare_forms() is deprecated. Use forms_are_compatible() instead.')
     return forms_are_compatible(form1, form2, subset=False)
 
 
@@ -555,3 +555,76 @@ def get_form_by_dict(new_form, subset=False):
     ELN.publish_form(rs_form['globalId'])
 
     return rs_form
+
+
+
+def fill_form_fields(meta:dict, form_fields:list, term_map={}, strict=False):
+    """Create RSpace Document (list of document fields) from a JSON-style 
+    metadata dict and an RSpace Form (list of form fields).
+    
+    Parameters
+    ----------
+    meta : dict
+        JSON-style metadata dict
+
+    form_fields : list<dict>
+        list of Form field dicts of format `{'name': ..., 'type': ..., (...)}`
+
+    term_map : dict
+        map between terms in the form and in the metadata
+
+    strict : bool
+        If `True`, an error will be raised if the metadata dict contains any
+        terms that are present in neither the `form_fields` nor the `term_map`.
+        If `False`, only a warning is printed.
+    
+    Returns
+    -------
+    list<dict>
+        List of RSpace Document fields.
+    """
+
+    # sanity checks
+    map_terms = list(term_map.values())
+    form_terms = [field['name'] for field in form_fields]
+    for term in meta.keys():
+        if term not in form_terms:
+            if term not in map_terms:
+                if strict:
+                    raise KeyError(f"metadata term '{term}' not in form fields or term_map")
+                else:
+                    print(f"WARNING: metadata term '{term}' not in form fields or term_map")
+    for term in term_map.keys():
+        if term not in form_terms:
+            raise KeyError(f"map term '{term}' not in form fields")
+
+    # create doc fields
+    doc_fields = []
+    for field in form_fields:
+        value = ''
+
+        # try to fill field with metadata
+        if field['name'] in meta.keys():
+            value = str(meta[field['name']])
+        elif field['name'] in term_map.keys():
+            value = meta[term_map[field['name']]]
+        if field['type']=='Number':
+            try: value = float(value)
+            except: value = None
+        elif field['type'] in ('String', 'Radio'):
+            value = str(value)
+        elif field['type']=='Choice':
+            if isinstance(value, (list, dict, set)):
+                value = [str(val) for val in value]
+            else: 
+                value = [str(value)]
+        
+        # otherwise, use default
+        elif 'defaultValue' in field.keys(): 
+            value = field['defaultValue']
+        elif 'defaultValues' in field.keys(): 
+            value = field['defaultValues']
+        
+        doc_fields.append({'name': field['name'], 'content': value})
+
+    return doc_fields
