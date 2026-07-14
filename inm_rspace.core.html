@@ -1,0 +1,515 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>inm_rspace.core module &#8212; inm-rspace 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/cloud.css?v=f9ae72be" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script src="_static/documentation_options.js?v=2709fde1"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+
+    
+    
+     
+        <script src="_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="inm_rspace.workflow module" href="inm_rspace.workflow.html" />
+    <link rel="prev" title="inm_rspace package" href="inm_rspace.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="inm_rspace.workflow.html" title="inm_rspace.workflow module"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="inm_rspace.html" title="inm_rspace package"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">inm-rspace 0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="inm_rspace.html" accesskey="U">inm_rspace package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">inm_rspace.core module</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-inm_rspace.core">
+<span id="inm-rspace-core-module"></span><h1>inm_rspace.core module<a class="headerlink" href="#module-inm_rspace.core" title="Link to this heading">¶</a></h1>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<section id="get-all-documents-in-an-rspace-folder-or-notebook">
+<h3>Get all documents in an RSpace Folder or Notebook:<a class="headerlink" href="#get-all-documents-in-an-rspace-folder-or-notebook" title="Link to this heading">¶</a></h3>
+<img alt="Notebook contents." class="align-center" src="_images/RSpace_UV-vis.png" />
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">inm_rspace</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rs</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="n">get_docs_in_notebook</span><span class="p">(</span><span class="mi">7074</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">([</span><span class="n">doc</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<img alt="The generated output." class="align-center" src="_images/Code_UV-vis.png" />
+</section>
+<section id="create-a-new-rspace-form-from-a-json-metadata-file">
+<h3>Create a new RSpace Form from a JSON metadata file:<a class="headerlink" href="#create-a-new-rspace-form-from-a-json-metadata-file" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">json_content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;metadata.json&#39;</span><span class="p">))</span>
+<span class="n">form_fields</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="n">form_fields_from_json</span><span class="p">(</span><span class="n">json_content</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">rs_form</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="n">ELN</span><span class="o">.</span><span class="n">create_form</span><span class="p">(</span><span class="s1">&#39;inm-rspace_json&#39;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">form_fields</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created form </span><span class="si">{</span><span class="n">rs_form</span><span class="p">[</span><span class="s1">&#39;globalId&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For more examples on managing JSON schemas and RSpace Forms, refer to <a class="reference external" href="https://github.com/sintharic/inm-rspace/blob/main/examples/manage_forms.py">this script</a>.</p>
+</section>
+</section>
+<section id="api-documentation">
+<h2>API documentation<a class="headerlink" href="#api-documentation" title="Link to this heading">¶</a></h2>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="inm_rspace.core.ELNClass">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">ELNClass</span></span><a class="reference internal" href="_modules/inm_rspace/core.html#ELNClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.ELNClass" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ELNClient</span></code></p>
+<p>ELN class enhancing the rspace_client.eln.ELNClient class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="inm_rspace.core.ELNClass.connect">
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#ELNClass.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.ELNClass.connect" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="inm_rspace.core.InventoryClass">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">InventoryClass</span></span><a class="reference internal" href="_modules/inm_rspace/core.html#InventoryClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.InventoryClass" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">InventoryClient</span></code></p>
+<p>Inventory class enhancing the rspace_client.inv.InventoryClient class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="inm_rspace.core.InventoryClass.connect">
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#InventoryClass.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.InventoryClass.connect" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.compare_forms">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">compare_forms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">form1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#compare_forms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.compare_forms" title="Link to this definition">¶</a></dt>
+<dd><p>Deprecated version of forms_are_compatible.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.document_fields_from_json">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">document_fields_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#document_fields_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.document_fields_from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a JSON-style dict with key,value pairs into a list of
+RSpace document fields of format <cite>[{‘name’: &lt;key&gt;, ‘content’: &lt;value&gt;}, …]</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_dict</strong> (<em>dict</em>) – JSON-style dict</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>list&lt;dict&gt;</strong> – RSpace document-style list of {‘name’: …, ‘content’: …} dicts.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.field_index">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">field_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">document</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#field_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.field_index" title="Link to this definition">¶</a></dt>
+<dd><p>get index of the (first) field from an Rspace document dict with a given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>document</strong> (<em>dict</em>) – input document</p></li>
+<li><p><strong>field_name</strong> (<em>str</em>) – name of the field to be accessed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>idx</strong> (<em>int</em>) – the index of the field with the given name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.fields_are_compatible">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">fields_are_compatible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#fields_are_compatible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.fields_are_compatible" title="Link to this definition">¶</a></dt>
+<dd><p>determine whether two field lists are identical (or one is a subset of the
+other).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fields1</strong> (<em>dict</em>) – a list of RSpace field dicts containing at least the keys ‘name’ and ‘type’.</p></li>
+<li><p><strong>fields2</strong> (<em>dict</em>) – a list of RSpace field dicts containing at least the keys ‘name’ and ‘type’.</p></li>
+<li><p><strong>subset</strong> (<em>bool</em>) – if <cite>True</cite>, the function only checks whether the fields of &lt;form1&gt; are
+a subset of the fields in &lt;form2&gt;.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>match</strong> (<em>bool</em>) – True if both forms are compatible, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.fill_form_fields">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">fill_form_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form_fields</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#fill_form_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.fill_form_fields" title="Link to this definition">¶</a></dt>
+<dd><p>Create RSpace Document (list of document fields) from a JSON-style
+metadata dict and an RSpace Form (list of form fields).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>meta</strong> (<em>dict</em>) – JSON-style metadata dict</p></li>
+<li><p><strong>form_fields</strong> (<em>list&lt;dict&gt;</em>) – list of Form field dicts of format <cite>{‘name’: …, ‘type’: …, (…)}</cite></p></li>
+<li><p><strong>term_map</strong> (<em>dict</em>) – map between terms in the form and in the metadata</p></li>
+<li><p><strong>strict</strong> (<em>bool</em>) – If <cite>True</cite>, an error will be raised if the metadata dict contains any
+terms that are present in neither the <cite>form_fields</cite> nor the <cite>term_map</cite>.
+If <cite>False</cite>, only a warning is printed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>list&lt;dict&gt;</strong> – List of RSpace Document fields.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.form_fields_from_json">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">form_fields_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#form_fields_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.form_fields_from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a JSON-style dict with key,value pairs into a list of
+RSpace Form fields of format <cite>[{‘name’: &lt;key&gt;, ‘type’: type(&lt;value&gt;)}, …]</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json_dict</strong> (<em>dict</em>) – JSON-style dict</p></li>
+<li><p><strong>default</strong> (<em>bool</em>) – if <cite>True</cite>, supplied values in the JSON-style dict are considered to be
+the default in the RSpace Form.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>list&lt;dict&gt;</strong> – RSpace Form field list of {‘name’: …, ‘type’: …, (…)} dicts.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.forms_are_compatible">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">forms_are_compatible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">form1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#forms_are_compatible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.forms_are_compatible" title="Link to this definition">¶</a></dt>
+<dd><p>determine whether two forms are identical (or one is a subset of the
+other).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>form1</strong> (<em>dict</em>) – an RSpace Form-style dict containing at least the keys ‘name’ and ‘fields’.</p></li>
+<li><p><strong>form2</strong> (<em>dict</em>) – an RSpace Form-style dict containing at least the keys ‘name’ and ‘fields’.</p></li>
+<li><p><strong>subset</strong> (<em>bool</em>) – if <cite>True</cite>, the function only checks whether the fields of &lt;form1&gt; are
+a subset of the fields in &lt;form2&gt;.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>match</strong> (<em>bool</em>) – True if both forms are compatible, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.get_docs_in_folder">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">get_docs_in_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#get_docs_in_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.get_docs_in_folder" title="Link to this definition">¶</a></dt>
+<dd><p>scan for Rspace documents in a given folder whose form name matches a pattern</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder_id</strong> (<em>str</em>) – folderID of the Rspace folder to search for matches</p></li>
+<li><p><strong>form_pattern</strong> (<em>str</em>) – glob-style pattern that the form name must match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>results</strong> (<em>list&lt;dict&gt;</em>) – list of documents matching the form name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.get_docs_in_notebook">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">get_docs_in_notebook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">notebook_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#get_docs_in_notebook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.get_docs_in_notebook" title="Link to this definition">¶</a></dt>
+<dd><p>scan for Rspace documents in a given folder whose form name matches a pattern</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>notebook_id</strong> (<em>str</em>) – notebookID of the Rspace notebook to search for matches</p></li>
+<li><p><strong>form_pattern</strong> (<em>str</em>) – glob-style pattern that the form name must match</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>results</strong> (<em>list&lt;dict&gt;</em>) – list of documents matching the form name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.get_field">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">get_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">document</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#get_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.get_field" title="Link to this definition">¶</a></dt>
+<dd><p>get (the first) field from an Rspace document dict with a given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>document</strong> (<em>dict</em>) – input document</p></li>
+<li><p><strong>field_name</strong> (<em>str</em>) – name of the field to be accessed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>field</strong> (<em>dict</em>) – field with the given name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.get_files">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">get_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">document</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#get_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.get_files" title="Link to this definition">¶</a></dt>
+<dd><p>list files attached to (a field in) an Rspace document</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>document</strong> (<em>RspaceDocument</em>) – input document</p></li>
+<li><p><strong>field_key</strong> (<em>int</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – name of the field, from which files are extracted.
+If None, files from all fields are listed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>files</strong> (<em>list&lt;tuple&lt;str,str&gt;&gt;</em>) – files found as globalId,filename-pairs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.get_form_by_dict">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">get_form_by_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_form</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#get_form_by_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.get_form_by_dict" title="Link to this definition">¶</a></dt>
+<dd><p>If it exists, return the (first) Rspace Form matching a given
+RSpace Form definition dict. Otherwise, create this Form and return it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_form</strong> (<em>dict</em>) – a dict corresponding to an RSpace Form definition containing at least
+the keys ‘name’ and ‘fields’.</p></li>
+<li><p><strong>subset</strong> (<em>bool</em>) – if <cite>True</cite>, the function only checks whether the fields of &lt;new_form&gt;
+are a subset of the fields in an existing RSpace Form.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>rs_form</strong> (<em>dict</em>) – the found/newly created RSpace form.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.get_line">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">get_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#get_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.get_line" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.get_requests">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">get_requests</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shared_folder_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#get_requests"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.get_requests" title="Link to this definition">¶</a></dt>
+<dd><p>get all shared documents requesting a workflow to be performed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>shared_folder_id</strong> (<em>str</em>) – folderId of the “Shared” Folder in Rspace</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>results</strong> (<em>list&lt;dict&gt;</em>) – list of shared Rspace documents using a <cite>Request:*</cite> form</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.html_ref">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">html_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rspace_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#html_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.html_ref" title="Link to this definition">¶</a></dt>
+<dd><p>html string to reference an Rspace object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rspace_obj</strong> (<em>file</em><em> or </em><em>document</em>) – Rspace object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>string</strong> (<em>str</em>) – string that can be inserted in an html string to reference the given object.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – raised if the rspace object type is not recognized</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="inm_rspace.core.tables_from_xml">
+<span class="sig-prename descclassname"><span class="pre">inm_rspace.core.</span></span><span class="sig-name descname"><span class="pre">tables_from_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xml_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">','</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'</span> <span class="pre">':</span> <span class="pre">'_',</span> <span class="pre">',':</span> <span class="pre">'.',</span> <span class="pre">'&lt;/p&gt;':</span> <span class="pre">'',</span> <span class="pre">'&lt;p&gt;':</span> <span class="pre">''}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/inm_rspace/core.html#tables_from_xml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#inm_rspace.core.tables_from_xml" title="Link to this definition">¶</a></dt>
+<dd><p>extract all tabular data from an xml string and save it as a csv file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xml_string</strong> (<em>str</em>) – input xml string</p></li>
+<li><p><strong>file</strong> (<em>str</em>) – file path to use, although an appendix is going to be inserted
+to enumerate multiple tables in the xml string.</p></li>
+<li><p><strong>delimiter</strong> (<em>str</em><em>, </em><em>optional</em>) – field delimiter to be used in the csv file</p></li>
+<li><p><strong>replace</strong> (<em>dict</em><em>, </em><em>optional</em>) – key,value pairs indicating strings (keys) to be replaced with their corresponding value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>files</strong> (<em>list&lt;str&gt;</em>) – List of files exported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
+    <h3><a href="index.html">Page contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">inm_rspace.core module</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#get-all-documents-in-an-rspace-folder-or-notebook">Get all documents in an RSpace Folder or Notebook:</a></li>
+<li><a class="reference internal" href="#create-a-new-rspace-form-from-a-json-metadata-file">Create a new RSpace Form from a JSON metadata file:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#api-documentation">API documentation</a></li>
+<li><a class="reference internal" href="#inm_rspace.core.ELNClass"><code class="docutils literal notranslate"><span class="pre">ELNClass</span></code></a><ul>
+<li><a class="reference internal" href="#inm_rspace.core.ELNClass.connect"><code class="docutils literal notranslate"><span class="pre">ELNClass.connect()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#inm_rspace.core.InventoryClass"><code class="docutils literal notranslate"><span class="pre">InventoryClass</span></code></a><ul>
+<li><a class="reference internal" href="#inm_rspace.core.InventoryClass.connect"><code class="docutils literal notranslate"><span class="pre">InventoryClass.connect()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#inm_rspace.core.compare_forms"><code class="docutils literal notranslate"><span class="pre">compare_forms()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.document_fields_from_json"><code class="docutils literal notranslate"><span class="pre">document_fields_from_json()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.field_index"><code class="docutils literal notranslate"><span class="pre">field_index()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.fields_are_compatible"><code class="docutils literal notranslate"><span class="pre">fields_are_compatible()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.fill_form_fields"><code class="docutils literal notranslate"><span class="pre">fill_form_fields()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.form_fields_from_json"><code class="docutils literal notranslate"><span class="pre">form_fields_from_json()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.forms_are_compatible"><code class="docutils literal notranslate"><span class="pre">forms_are_compatible()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.get_docs_in_folder"><code class="docutils literal notranslate"><span class="pre">get_docs_in_folder()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.get_docs_in_notebook"><code class="docutils literal notranslate"><span class="pre">get_docs_in_notebook()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.get_field"><code class="docutils literal notranslate"><span class="pre">get_field()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.get_files"><code class="docutils literal notranslate"><span class="pre">get_files()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.get_form_by_dict"><code class="docutils literal notranslate"><span class="pre">get_form_by_dict()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.get_line"><code class="docutils literal notranslate"><span class="pre">get_line()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.get_requests"><code class="docutils literal notranslate"><span class="pre">get_requests()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.html_ref"><code class="docutils literal notranslate"><span class="pre">html_ref()</span></code></a></li>
+<li><a class="reference internal" href="#inm_rspace.core.tables_from_xml"><code class="docutils literal notranslate"><span class="pre">tables_from_xml()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="inm_rspace.html"
+                          title="Previous page">&larr; inm_rspace package</a></p>
+  </div>
+  <div class="sphinxnext">
+    <h4>Next page</h4>
+    <p class="topless"><a href="inm_rspace.workflow.html"
+                          title="Next page">&rarr; inm_rspace.workflow module</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/inm_rspace.core.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="inm_rspace.workflow.html" title="inm_rspace.workflow module"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="inm_rspace.html" title="inm_rspace package"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">inm-rspace 0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="inm_rspace.html" >inm_rspace package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">inm_rspace.core module</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Christian Müller.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
